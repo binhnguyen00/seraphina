@@ -8,23 +8,18 @@ Usage: Application Management
  ./application.sh [COMMAND] [OPTION]
 
 Start
- ./application.sh start:dev --jar=/path/to/application.jar
- ./application.sh start:prod --jar=/path/to/application.jar
- TODO: add run daemon
+ ./application.sh start --profile=dev/prod --jar=/path/to/application.jar
 
 Build
  ./application.sh build
-
-Stop
- ./application.sh stop
 
   """
 }
 
 function start() {
   local profile="dev"
-  if [ "$1" = "start:prod" ]; then
-    profile="prod"
+  if has_opt "--profile" "$@"; then
+    profile=$(get_opt "--profile" "dev" "$@")
   fi
 
   if has_opt "--jar" "$@"; then
@@ -37,10 +32,6 @@ function start() {
     java -jar "$JAR_PATH" \
       --spring.profiles.active="$profile"
   fi
-}
-
-function stop() {
-  # implement this
 }
 
 function build() {
@@ -60,7 +51,7 @@ else
   exit 1
 fi
 
-if [[ "$COMMAND" == start:* ]] ; then
+if [ "$COMMAND" = "start" ]; then
   start "$COMMAND" "$@"
 elif [ "$COMMAND" = "stop" ] ; then
   stop
