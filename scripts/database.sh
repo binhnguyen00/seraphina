@@ -15,6 +15,28 @@ if ! command -v psql > /dev/null 2>&1; then
   exit 1
 fi
 
+function show_help() {
+  echo """
+Usage: Manipulating database
+  ./database.sh [COMMAND] [OPTION]
+
+NOTE: You should change the value in ./common/database-env.sh
+
+Dump
+  ./database.sh dump
+
+Restore
+  ./database.sh restore [FILE]
+
+Initial Database
+  ./database.sh initial-db
+
+Initial Admin User
+  ./database.sh initial-user
+
+  """
+}
+
 function init_db() {
   PGPASSWORD=$ADMIN_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $ADMIN_USER -d $ADMIN_DB -c "DROP DATABASE IF EXISTS $DB_NAME"
   PGPASSWORD=$ADMIN_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $ADMIN_USER -d $ADMIN_DB -c "CREATE DATABASE $DB_NAME"
@@ -57,28 +79,6 @@ function restore() {
     PGPASSWORD=$DB_PASSWORD pg_restore -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" "$FILE"
     echo $FILE
   fi
-}
-
-function show_help() {
-  echo """
-Usage: Manipulating database 
-  ./database.sh [COMMAND] [OPTION]
-
-NOTE: You should change the value in ./common/database-env.sh
-
-Dump
-  ./database.sh dump
-
-Restore
-  ./database.sh restore [FILE]
-
-Initial Database
-  ./database.sh initial-db
-
-Initial Admin User
-  ./database.sh initial-user
-  
-  """
 }
 
 COMMAND=$1;
