@@ -1,12 +1,12 @@
 plugins {
-  id 'java'
-  id 'org.springframework.boot' version "${springBootVersion}"
-  id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+  id "java"
+  id "org.springframework.boot" version "${springBootVersion}"
+  id "io.spring.dependency-management" version "${springDependencyManagementVersion}"
 }
 
-group = 'me.binhnguyen'
-version = '0.0.1-SNAPSHOT'
-description = 'Premier League Reminder'
+group = "me.binhnguyen"
+version = "0.0.1"
+description = "Premier League Reminder"
 
 java {
   toolchain {
@@ -25,14 +25,15 @@ repositories {
 }
 
 dependencies {
-  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-  implementation 'org.springframework.boot:spring-boot-starter-security'
-  implementation 'org.springframework.boot:spring-boot-starter-web'
-  compileOnly 'org.projectlombok:lombok'
-  annotationProcessor 'org.projectlombok:lombok'
-  testImplementation 'org.springframework.boot:spring-boot-starter-test'
-  testImplementation 'org.springframework.security:spring-security-test'
-  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+  implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+  implementation "org.springframework.boot:spring-boot-starter-security"
+  implementation "org.springframework.boot:spring-boot-starter-web"
+  implementation "org.postgresql:postgresql:${postgresVersion}"
+  compileOnly "org.projectlombok:lombok"
+  annotationProcessor "org.projectlombok:lombok"
+  testImplementation "org.springframework.boot:spring-boot-starter-test"
+  testImplementation "org.springframework.security:spring-security-test"
+  testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 test {

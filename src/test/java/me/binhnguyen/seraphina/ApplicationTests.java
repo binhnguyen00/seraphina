@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
-class SeraphinaApplicationTests {
+class ApplicationTests {
   @Test
   void contextLoads() {
   }
