@@ -22,16 +22,24 @@ class CrawlerServiceTest {
   private SeasonService seasonService;
 
   @Test
-  void pullCurrentWeekScheduleMatchesTest() {
+  void pullEmptyMatchesTest() {
     Season thisSeason = seasonService.getOrCreate();
-    List<HashMap<String, Object>> matches = crawlerService.pullScheduleMatches(thisSeason, null, null);
+    List<HashMap<String, Object>> matches = crawlerService.pullMatchesByDate(
+      thisSeason,
+      LocalDate.parse("2025-09-06"),
+      LocalDate.parse("2025-09-07")
+    );
     Assertions.assertTrue(matches.isEmpty());
   }
 
   @Test
-  void pullScheduleMatchesTest() {
+  void pullMatchesTest() {
     Season thisSeason = seasonService.getOrCreate();
-    List<HashMap<String, Object>> matches = crawlerService.pullScheduleMatches(thisSeason, LocalDate.parse("2025-09-13"), LocalDate.parse("2025-09-14"));
+    List<HashMap<String, Object>> matches = crawlerService.pullMatchesByDate(
+      thisSeason,
+      LocalDate.parse("2025-09-13"),
+      LocalDate.parse("2025-09-14")
+    );
     Assertions.assertFalse(matches.isEmpty());
   }
 }
