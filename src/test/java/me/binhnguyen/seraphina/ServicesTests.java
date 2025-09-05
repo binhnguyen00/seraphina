@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @SpringBootTest
-class ServicesTest {
+class ServicesTests {
 
   @Autowired
   private CrawlerService crawlerService;
@@ -49,8 +49,7 @@ class ServicesTest {
   }
 
   @Test
-  void saveMatchupTest() {
-    // TODO: fix timezone
+  void createOrUpdateMatchesTest() {
     Season thisSeason = seasonService.getOrCreate();
     List<Matchup> matchups = premierLeagueService.createOrUpdateMatches(
       thisSeason,

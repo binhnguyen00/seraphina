@@ -39,8 +39,13 @@ public class Matchup extends BaseEntity {
   @Column(name = "is_notified")
   private boolean isNotified;
 
+  public String getOrCreateCode() {
+    this.generateCode();
+    return this.code;
+  }
+
   @PrePersist
-  public String generateCode() {
+  public void generateCode() {
     if (Objects.isNull(this.code) || this.code.isEmpty() || this.code.isBlank()) {
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
       String matchDayStr = matchDay.format(formatter);
@@ -48,7 +53,6 @@ public class Matchup extends BaseEntity {
       String awaySlug = slugify(away);
       this.code = String.format("%s-%s-%s", homeSlug, awaySlug, matchDayStr);
     }
-    return this.code;
   }
 
   private String slugify(String input) {

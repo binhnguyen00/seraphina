@@ -32,7 +32,7 @@ public class PremierLeagueService {
     List<Matchup> toUpdates = new ArrayList<>();
 
     for (Matchup matchup : matchups) {
-      String code = matchup.generateCode();
+      String code = matchup.getOrCreateCode();
       Matchup exist = matchupRepo.getByCode(code);
 
       if (Objects.isNull(exist)) {
@@ -63,7 +63,7 @@ public class PremierLeagueService {
     List<Matchup> toUpdates = new ArrayList<>();
 
     for (Matchup matchup : matchups) {
-      String code = matchup.generateCode();
+      String code = matchup.getOrCreateCode();
       Matchup exist = matchupRepo.getByCode(code);
 
       if (Objects.isNull(exist)) {
