@@ -3,7 +3,6 @@ package me.binhnguyen.seraphina.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import me.binhnguyen.seraphina.entity.Season;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 

@@ -19,30 +19,43 @@ public class CrawlerService {
   private final String leagueId = "eng.1";
   private final RestTemplate restTemplate = new RestTemplate();
 
-  /** pull this week matches */
-  public List<HashMap<String, Object>> pullScheduleMatches(@NonNull Season season) {
-    String url = String.format("%s/%s/scoreboard", this.baseUrl, this.leagueId);
-    List<LocalDate> thisWeekMatchDays = season.getThisWeekMatchDays();
-    if (thisWeekMatchDays.isEmpty()) {
-      log.error("This weekend has no matches");
-      return new ArrayList<>();
-    }
-    log.info("This week match days: {}", thisWeekMatchDays);
-
-    UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
-    String dates = thisWeekMatchDays
-      .stream()
-      .map(date -> date.toString().replace("-", ""))
-      .collect(Collectors.joining("-")); // matchesHolder: "20250913-20250914"
-    builder.queryParam("dates", dates);
-
-    ResponseEntity<HashMap> response = restTemplate.getForEntity(builder.toUriString(), HashMap.class);
+  private HashMap<String, Object> callApi(String url) {
+    ResponseEntity<HashMap> response = restTemplate.getForEntity(url, HashMap.class);
     HashMap<String, Object> body = response.getBody();
     if (Objects.isNull(body)) {
-      log.error("Schedule matches are not found");
-      return new ArrayList<>();
+      log.error("API response is undefined");
+      return new HashMap<>();
     }
+    return body;
+  }
 
+  /** pull this week matches or by date range
+   * @param season is required
+   * @param from is optional
+   * @param to is optional
+   * @return list of matches
+  */
+  public List<HashMap<String, Object>> pullScheduleMatches(@NonNull Season season, LocalDate from, LocalDate to) {
+    final String url = String.format("%s/%s/scoreboard", this.baseUrl, this.leagueId);
+
+    UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
+    String dates = ""; // target result: "20250913-20250914"
+    if (Objects.nonNull(from) && Objects.nonNull(to)) {
+      dates = String.format("%s-%s", from.toString().replace("-", ""), to.toString().replace("-", ""));
+    } else {
+      List<LocalDate> thisWeekMatchDays = season.getThisWeekMatchDays();
+      if (thisWeekMatchDays.isEmpty()) {
+        log.error("This weekend has no matches");
+        return new ArrayList<>();
+      }
+      log.info("This week match days: {}", thisWeekMatchDays);
+      dates = thisWeekMatchDays
+        .stream()
+        .map(date -> date.toString().replace("-", ""))
+        .collect(Collectors.joining("-"));
+    }
+    builder.queryParam("dates", dates);
+    HashMap<String, Object> body = this.callApi(builder.toUriString());
     ArrayList<HashMap<String, Object>> matches = (ArrayList<HashMap<String, Object>>) body.getOrDefault("events", new ArrayList<>());
     if (matches.isEmpty()) {
       log.error("Has no schedule matches");

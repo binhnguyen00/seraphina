@@ -13,8 +13,8 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class SeasonService {
-  private final CrawlerService crawlerService;
   private final SeasonRepo seasonRepo;
+  private final CrawlerService crawlerService;
 
   @Transactional
   public Season createSeason() {
