@@ -7,7 +7,7 @@ import me.binhnguyen.seraphina.repository.SeasonRepo;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -18,7 +18,7 @@ public class SeasonService {
 
   @Transactional
   public Season createSeason() {
-    ArrayList<LocalDate> matchDays = crawlerService.getCurrentSeasonScheduleMatchDays();
+    List<LocalDate> matchDays = crawlerService.getCurrentSeasonScheduleMatchDays();
     Season record = new Season();
     record.setMatchDays(matchDays);
     record = seasonRepo.save(record);

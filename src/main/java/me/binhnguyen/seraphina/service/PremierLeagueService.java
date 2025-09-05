@@ -23,7 +23,7 @@ public class PremierLeagueService {
   /** save this week matches */
   @Transactional
   public List<Matchup> createOrUpdateMatches(Season season) {
-    List<HashMap<String, Object>> matches = crawlerService.pullMatches(season);
+    List<Map<String, Object>> matches =   crawlerService.pullMatches(season);
     if (matches.isEmpty())
       return Collections.emptyList();
 
@@ -54,7 +54,7 @@ public class PremierLeagueService {
   /** save this matches by date range */
   @Transactional
   public List<Matchup> createOrUpdateMatches(Season season, LocalDate from, LocalDate to) {
-    List<HashMap<String, Object>> matches = crawlerService.pullMatchesByDate(season, from, to);
+    List<Map<String, Object>> matches = crawlerService.pullMatchesByDate(season, from, to);
     if (matches.isEmpty())
       return Collections.emptyList();
 
@@ -83,12 +83,12 @@ public class PremierLeagueService {
   }
 
   @SuppressWarnings("unchecked")
-  public List<Matchup> toMatchups(List<HashMap<String, Object>> matches) {
+  public List<Matchup> toMatchups(List<Map<String, Object>> matches) {
     List<Matchup> matchups = new ArrayList<>();
-    for (HashMap<String, Object> match : matches) {
+    for (Map<String, Object> match : matches) {
       Matchup matchup = new Matchup();
-      ArrayList<HashMap<String, Object>> competitors = (ArrayList<HashMap<String, Object>>) match.get("competitors");
-      for (HashMap<String, Object> competitor : competitors) {
+      List<Map<String, Object>> competitors = (List<Map<String, Object>>) match.get("competitors");
+      for (Map<String, Object> competitor : competitors) {
         String teamName = competitor.getOrDefault("teamName", "").toString();
         String homeAway = competitor.getOrDefault("homeAway", "").toString();
         boolean isHome = homeAway.equals("home");
