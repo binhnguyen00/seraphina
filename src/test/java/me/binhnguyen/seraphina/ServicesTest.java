@@ -6,7 +6,6 @@ import me.binhnguyen.seraphina.service.CrawlerService;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
 import me.binhnguyen.seraphina.service.SeasonService;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -50,9 +49,13 @@ class ServicesTest {
   }
 
   @Test
-  @Disabled("Skipping until finished debugging")
   void saveMatchupTest() {
-    List<Matchup> matchups = premierLeagueService.saveThisWeekMatches();
+    Season thisSeason = seasonService.getOrCreate();
+    List<Matchup> matchups = premierLeagueService.saveMatches(
+      thisSeason,
+      LocalDate.parse("2025-09-13"),
+      LocalDate.parse("2025-09-14")
+    );
     Assertions.assertFalse(matchups.isEmpty());
   }
 }
