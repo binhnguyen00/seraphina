@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MatchupRepo extends JpaRepository<Matchup, Persistence> {
+  Matchup getByCode(String code);
 }

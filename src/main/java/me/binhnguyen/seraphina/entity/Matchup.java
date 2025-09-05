@@ -8,8 +8,9 @@ import lombok.Getter;
 import lombok.Setter;
 import me.binhnguyen.seraphina.common.BaseEntity;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 @Table(name = Matchup.TABLE_NAME)
 @Entity
@@ -17,6 +18,7 @@ public class Matchup extends BaseEntity {
   public static final String TABLE_NAME = "matchup";
 
   @Getter @Setter
+  @Column(unique = true, nullable = false)
   private String code;
 
   @Getter @Setter
@@ -31,24 +33,22 @@ public class Matchup extends BaseEntity {
 
   @Getter @Setter
   @Column(name = "match_day")
-  private LocalDateTime matchDay;
+  private OffsetDateTime matchDay;
 
   @Getter @Setter
   @Column(name = "is_notified")
   private boolean isNotified;
 
   @PrePersist
-  public void generateCode() {
-    if (this.code == null || this.code.isEmpty()) {
+  public String generateCode() {
+    if (Objects.isNull(this.code) || this.code.isEmpty() || this.code.isBlank()) {
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
       String matchDayStr = matchDay.format(formatter);
-
-      // Normalize team names
       String homeSlug = slugify(home);
       String awaySlug = slugify(away);
-
-      this.code = homeSlug + "_" + awaySlug + "_" + matchDayStr;
+      this.code = String.format("%s-%s-%s", homeSlug, awaySlug, matchDayStr);
     }
+    return this.code;
   }
 
   private String slugify(String input) {

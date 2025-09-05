@@ -50,12 +50,17 @@ class ServicesTest {
 
   @Test
   void saveMatchupTest() {
+    // TODO: fix timezone
     Season thisSeason = seasonService.getOrCreate();
-    List<Matchup> matchups = premierLeagueService.saveMatches(
+    List<Matchup> matchups = premierLeagueService.createOrUpdateMatches(
       thisSeason,
       LocalDate.parse("2025-09-13"),
       LocalDate.parse("2025-09-14")
     );
     Assertions.assertFalse(matchups.isEmpty());
+    matchups.forEach(matchup -> {
+      System.out.println(matchup.getCode());
+      System.out.println(matchup.getMatchDay().toString());
+    });
   }
 }

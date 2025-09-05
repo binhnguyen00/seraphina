@@ -9,64 +9,77 @@ import me.binhnguyen.seraphina.repository.MatchupRepo;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.time.ZoneOffset;
+import java.util.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PremierLeagueService {
-  private final SeasonService seasonService;
-  private final CrawlerService crawlerService;
   private final MatchupRepo matchupRepo;
+  private final CrawlerService crawlerService;
 
   /** save this week matches */
   @Transactional
-  public List<Matchup> saveMatches(Season season) {
-    List<Matchup> matchups = new ArrayList<>();
+  public List<Matchup> createOrUpdateMatches(Season season) {
     List<HashMap<String, Object>> matches = crawlerService.pullMatches(season);
     if (matches.isEmpty())
-      return matchups;
+      return Collections.emptyList();
 
-    matchups = this.toMatchups(matches);
-    try {
-      if (!matchups.isEmpty()) {
-        matchups = matchupRepo.saveAll(matchups);
+    List<Matchup> matchups = this.toMatchups(matches);
+    List<Matchup> toCreates = new ArrayList<>();
+    List<Matchup> toUpdates = new ArrayList<>();
+
+    for (Matchup matchup : matchups) {
+      String code = matchup.generateCode();
+      Matchup exist = matchupRepo.getByCode(code);
+
+      if (Objects.isNull(exist)) {
+        toCreates.add(matchup);
       } else {
-        log.warn("No matches found for this week");
-        return matchups;
+        exist.setHome(matchup.getHome());
+        exist.setAway(matchup.getAway());
+        exist.setMatchDay(matchup.getMatchDay());
+        toUpdates.add(exist);
       }
-    } catch (RuntimeException e) {
-      throw new RuntimeException(e);
     }
 
-    return matchups;
+    List<Matchup> savedMatchups = new ArrayList<>();
+    if (!toCreates.isEmpty()) savedMatchups.addAll(matchupRepo.saveAll(toCreates));
+    if (!toUpdates.isEmpty()) savedMatchups.addAll(matchupRepo.saveAll(toUpdates));
+    return savedMatchups;
   }
 
   /** save this matches by date range */
   @Transactional
-  public List<Matchup> saveMatches(Season season, LocalDate from, LocalDate to) {
-    List<Matchup> matchups = new ArrayList<>();
+  public List<Matchup> createOrUpdateMatches(Season season, LocalDate from, LocalDate to) {
     List<HashMap<String, Object>> matches = crawlerService.pullMatchesByDate(season, from, to);
     if (matches.isEmpty())
-      return matchups;
+      return Collections.emptyList();
 
-    matchups = this.toMatchups(matches);
-    try {
-      if (!matchups.isEmpty()) {
-        matchups = matchupRepo.saveAll(matchups);
+    List<Matchup> matchups = this.toMatchups(matches);
+    List<Matchup> toCreates = new ArrayList<>();
+    List<Matchup> toUpdates = new ArrayList<>();
+
+    for (Matchup matchup : matchups) {
+      String code = matchup.generateCode();
+      Matchup exist = matchupRepo.getByCode(code);
+
+      if (Objects.isNull(exist)) {
+        toCreates.add(matchup);
       } else {
-        log.warn("No matches found from {} to {}", from.toString(), to.toString());
-        return matchups;
+        exist.setHome(matchup.getHome());
+        exist.setAway(matchup.getAway());
+        exist.setMatchDay(matchup.getMatchDay());
+        toUpdates.add(exist);
       }
-    } catch (RuntimeException e) {
-      throw new RuntimeException(e);
     }
 
-    return matchups;
+    List<Matchup> savedMatchups = new ArrayList<>();
+    if (!toCreates.isEmpty()) savedMatchups.addAll(matchupRepo.saveAll(toCreates));
+    if (!toUpdates.isEmpty()) savedMatchups.addAll(matchupRepo.saveAll(toUpdates));
+    return savedMatchups;
   }
 
   @SuppressWarnings("unchecked")
@@ -86,9 +99,10 @@ public class PremierLeagueService {
       }
       String homeStadium = match.getOrDefault("homeStadium", "").toString();
       String startTime = match.getOrDefault("startTime", "").toString();
-      OffsetDateTime offsetDateTime = OffsetDateTime.parse(startTime);
-      LocalDateTime matchStartAt = offsetDateTime.toLocalDateTime();
-      matchup.setMatchDay(matchStartAt);
+      // Parse and convert to Vietnam offset (+07:00)
+      OffsetDateTime utcTime = OffsetDateTime.parse(startTime);
+      OffsetDateTime vietnameTime = utcTime.withOffsetSameInstant(ZoneOffset.of("+07:00"));
+      matchup.setMatchDay(vietnameTime);
       matchup.setHomeStadium(homeStadium);
       matchup.setNotified(false);
       matchups.add(matchup);
