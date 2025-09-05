@@ -6,12 +6,12 @@ import me.binhnguyen.seraphina.service.CrawlerService;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
 import me.binhnguyen.seraphina.service.SeasonService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,9 +27,15 @@ class ServicesTests {
   @Autowired
   private PremierLeagueService premierLeagueService;
 
+  private Season thisSeason;
+
+  @BeforeEach
+  void init() {
+    thisSeason = seasonService.getOrCreate();
+  }
+
   @Test
   void pullEmptyMatchesTest() {
-    Season thisSeason = seasonService.getOrCreate();
     List<Map<String, Object>> matches = crawlerService.pullMatchesByDate(
       thisSeason,
       LocalDate.parse("2025-09-06"),
@@ -40,7 +46,6 @@ class ServicesTests {
 
   @Test
   void pullMatchesTest() {
-    Season thisSeason = seasonService.getOrCreate();
     List<Map<String, Object>> matches = crawlerService.pullMatchesByDate(
       thisSeason,
       LocalDate.parse("2025-09-13"),
@@ -51,7 +56,6 @@ class ServicesTests {
 
   @Test
   void createOrUpdateMatchesTest() {
-    Season thisSeason = seasonService.getOrCreate();
     List<Matchup> matchups = premierLeagueService.createOrUpdateMatches(
       thisSeason,
       LocalDate.parse("2025-09-13"),

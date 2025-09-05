@@ -83,7 +83,7 @@ public class PremierLeagueService {
   }
 
   @SuppressWarnings("unchecked")
-  public List<Matchup> toMatchups(List<Map<String, Object>> matches) {
+  private List<Matchup> toMatchups(List<Map<String, Object>> matches) {
     List<Matchup> matchups = new ArrayList<>();
     for (Map<String, Object> match : matches) {
       Matchup matchup = new Matchup();
@@ -109,5 +109,13 @@ public class PremierLeagueService {
     }
 
     return matchups;
+  }
+
+  public List<Matchup> searchMatches() {
+    return Collections.emptyList();
+  }
+
+  public List<Matchup> getMatches(LocalDate from, LocalDate to) {
+    return Collections.emptyList();
   }
 }
