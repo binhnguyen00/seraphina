@@ -1,6 +1,5 @@
 package me.binhnguyen.seraphina.service;
 
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.Season;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +8,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
