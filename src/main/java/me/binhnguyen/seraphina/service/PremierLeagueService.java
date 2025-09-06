@@ -99,10 +99,9 @@ public class PremierLeagueService {
       }
       String homeStadium = match.getOrDefault("homeStadium", "").toString();
       String startTime = match.getOrDefault("startTime", "").toString();
-      // Parse and convert to Vietnam offset (+07:00)
       OffsetDateTime utcTime = OffsetDateTime.parse(startTime);
-      OffsetDateTime vietnameTime = utcTime.withOffsetSameInstant(ZoneOffset.of("+07:00"));
-      matchup.setMatchDay(vietnameTime);
+      matchup.setMatchDay(utcTime.withOffsetSameInstant(ZoneOffset.of("+07:00"))); // Parse and convert to Vietnam offset (+07:00)
+      matchup.setOriginMatchDay(utcTime.toLocalDateTime());
       matchup.setHomeStadium(homeStadium);
       matchup.setNotified(false);
       matchups.add(matchup);

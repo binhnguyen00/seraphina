@@ -24,4 +24,10 @@ public class AutomationService {
     record.setMatchDays(matchDays);
     seasonService.save(record);
   }
+
+  @Transactional
+  @Scheduled(cron = "0 0 0 1 * ?")
+  public void checkForPendingMatches() {
+  }
+
 }

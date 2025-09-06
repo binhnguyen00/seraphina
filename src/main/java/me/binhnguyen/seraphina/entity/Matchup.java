@@ -1,13 +1,11 @@
 package me.binhnguyen.seraphina.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import me.binhnguyen.seraphina.common.BaseEntity;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
@@ -28,12 +26,21 @@ public class Matchup extends BaseEntity {
   private String away;
 
   @Getter @Setter
+  @ManyToOne
+  @JoinColumn(name = "season_id", nullable = false)
+  private Season season;
+
+  @Getter @Setter
   @Column(name = "home_stadium")
   private String homeStadium;
 
   @Getter @Setter
   @Column(name = "match_day")
   private OffsetDateTime matchDay;
+
+  @Getter @Setter
+  @Column(name = "origin_match_day")
+  private LocalDateTime originMatchDay;
 
   @Getter @Setter
   @Column(name = "is_notified")
