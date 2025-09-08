@@ -1,7 +1,7 @@
 package me.binhnguyen.seraphina.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.binhnguyen.seraphina.entity.Matchup;
 import me.binhnguyen.seraphina.entity.ZaloChat;
 import me.binhnguyen.seraphina.repository.ZaloChatRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -60,21 +57,42 @@ public class ZaloChatService {
     }
   }
 
-  public void sendMessage(String message) {
-    List<ZaloChat> chats = repo.findAll();
-
+  public List<ZaloChat> sendMessage(String message) {
+    List<ZaloChat> subscribers = repo.findAll();
     String url = String.format("%s/send-message", this.zaloMicroServiceUrl);
 
-    chats.forEach(chat -> {
+    List<ZaloChat> failHolder = new ArrayList<>();
+    List<ZaloChat> successHolder = new ArrayList<>();
+
+    for (ZaloChat subscriber : subscribers) {
       Map<String, Object> payload = new HashMap<>();
-      payload.put("chat_id", chat.getLookupId());
+      payload.put("chat_id", subscriber.getLookupId());
       payload.put("message", message);
+
       ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
         url,
         HttpMethod.POST,
         new HttpEntity<>(payload),
         new ParameterizedTypeReference<>() {}
       );
-    });
+
+      Map<String, Object> body = response.getBody();
+      if (Objects.isNull(body)) {
+        failHolder.add(subscriber);
+        continue;
+      }
+
+      boolean success = Objects.equals(body.get("success"), false);
+      if (success) {
+        successHolder.add(subscriber);
+      } else {
+        failHolder.add(subscriber);
+      }
+    }
+
+    successHolder.forEach(success -> log.info("Sent message to chat {}, {}", success.getLookupId(), success.getName()));
+    failHolder.forEach(fail -> log.error("Failed to send message to chat {}, {}", fail.getLookupId(), fail.getName()));
+
+    return successHolder;
   }
 }

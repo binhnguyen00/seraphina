@@ -23,7 +23,7 @@ public class PremierLeagueService {
   /** save this week matches */
   @Transactional
   public List<Matchup> createOrUpdateMatches(Season season) {
-    List<Map<String, Object>> matches =   crawlerService.pullMatches(season);
+    List<Map<String, Object>> matches = crawlerService.pullMatches(season);
     if (matches.isEmpty())
       return Collections.emptyList();
 
@@ -112,11 +112,29 @@ public class PremierLeagueService {
     return matchups;
   }
 
-  public List<Matchup> searchMatches() {
+  /** returns this matches by date range*/
+  public List<Matchup> getMatches(Season season, LocalDate from, LocalDate to) {
     return Collections.emptyList();
   }
 
-  public List<Matchup> getMatches(LocalDate from, LocalDate to) {
-    return Collections.emptyList();
+  /** returns this week matches */
+  public List<Matchup> getMatches(Season season) {
+    List<LocalDate> thisWeekDates = season.getThisWeekMatchDays();
+    List<Matchup> matches = matchupRepo.getByMatchDayBetween(
+      thisWeekDates.getFirst(),
+      thisWeekDates.getLast()
+    );
+    if (matches.isEmpty()) {
+      log.info("No matches found for this week {}", thisWeekDates);
+      return Collections.emptyList();
+    }
+    return matches;
+  }
+
+  public List<Matchup> markNotified(List<Matchup> matchups) {
+    for (Matchup matchup : matchups) {
+      matchup.setNotified(true);
+    }
+    return matchupRepo.saveAll(matchups);
   }
 }
