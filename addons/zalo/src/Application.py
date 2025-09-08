@@ -1,10 +1,10 @@
 import os;
-import json;
 import requests;
 
-from zalo_bot import Bot;
+from flask import Flask, request;
+from zalo_bot import Bot, Update;
+from zalo_bot.ext import Dispatcher, CommandHandler, MessageHandler, filters;
 from pydantic import BaseModel;
-from fastapi import FastAPI, status;
 from typing import Optional;
 from dotenv import load_dotenv;
 
@@ -15,7 +15,7 @@ if (not BOT_TOKEN):
   raise ValueError("BOT_TOKEN is not set")
 
 bot = Bot(token=BOT_TOKEN)
-app = FastAPI(title="Zalo Bot", version="1.0.0", description="Zalo Bot Microservice which send message to registered users")
+app = Flask(__name__)
 
 class Request(BaseModel):
   user_id: str
@@ -27,23 +27,76 @@ class Response(BaseModel):
   message: str
   data: Optional[dict] = None
 
-@app.post('/send-message')
+  def to_dict(self):
+    return {
+      "status"  : self.status,
+      "success" : self.success,
+      "message" : self.message,
+      "data"    : self.data
+    }
+
+async def start(update: Update, context):
+  if (not update.effective_user):
+    return
+
+  await update.message.reply_text(f"Xin chào {update.effective_user.display_name}!") # type: ignore
+  chat_id: str = update.effective_user.id
+  # TODO: save chat_id
+
+async def echo(update: Update, context):
+  print(update.effective_user.id) # type: ignore
+  if (not update.message):
+    return
+  await update.message.reply_text(f"Bạn vừa nói: {update.message.text}") # type: ignore
+
+with app.app_context():
+  webhook_url: Optional[str] = os.getenv("WEBHOOK_URL")
+  print(webhook_url)
+  secret_token: Optional[str] = os.getenv("WEBHOOK_SECRET_TOKEN")
+  print(secret_token)
+  if (not webhook_url or not secret_token):
+    raise ValueError("WEBHOOK_URL or WEBHOOK_SECRET_TOKEN is not set")
+
+  bot.set_webhook(url=webhook_url, secret_token=secret_token)
+
+  dispatcher = Dispatcher(bot, None, workers=0)
+  dispatcher.add_handler(CommandHandler("start", start))
+  dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo)) # type: ignore
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+  update: Optional[Update] = Update.de_json(request.get_json(force=True), bot)
+  if (not update):
+    return Response(
+      status=400,
+      success=False,
+      message="Can not update webhook"
+    ).to_dict()
+
+  dispatcher.process_update(update)
+  return Response(
+    status=200,
+    success=True,
+    message="Update processed successfully"
+  ).to_dict()
+
+@app.route('/send-message', methods=['POST'])
 async def send_message(request: Request):
   try:
     await bot.send_message(chat_id=request.user_id, text=request.message)
     return Response(
-      status=status.HTTP_200_OK,
+      status=200,
       success=True,
       message="Message sent successfully"
-    )
+    ).to_dict()
   except Exception as e:
     return Response(
-      status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+      status=500,
       success=False,
       message=str(e)
-    )
+    ).to_dict()
 
-@app.get('/me')
+@app.route('/me', methods=['GET'])
 async def get_me():
   entrypoint: str = f"https://bot-api.zapps.me/bot{BOT_TOKEN}/getMe"
   response: requests.Response = requests.get(url=entrypoint)
@@ -52,30 +105,29 @@ async def get_me():
   
   if (not result.get("ok", False)):
     return Response(
-      status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+      status=500,
       success=False,
       message="Get me failed"
-    )
+    ).to_dict()
 
   return Response(
-    status=status.HTTP_200_OK,
+    status=200,
     success=True, 
     message="Get me successfully",
     data=result
-  )
+  ).to_dict()
 
-@app.get('/health')
+@app.route('/health', methods=['GET'])
 def health_check():
   return Response(
-    status=status.HTTP_200_OK,
+    status=200,
     success=True,
     message="Healthy"
-  )
+  ).to_dict()
 
 if (__name__ == '__main__'):
   PORT: Optional[str] = os.getenv("PORT")
   if (not PORT):
     raise ValueError("PORT is not set")
 
-  import uvicorn;
-  uvicorn.run(app, host='0.0.0.0', port=int(PORT))
+  app.run(port=int(PORT))

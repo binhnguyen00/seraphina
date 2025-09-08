@@ -1,6 +1,7 @@
 python-zalo-bot
 python-dotenv
 httpx
-fastapi
+flask
 uvicorn
 requests
+pydantic
