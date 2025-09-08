@@ -28,7 +28,7 @@ public class AutomationService {
 
   @Transactional
   @Scheduled(cron = "0 0 0 1 * ?")
-  public void checkForPendingMatches() {
+  public void updateMatches() {
 
   }
 }
