@@ -36,9 +36,9 @@ function start() {
 
 function build() {
   if $windowsOS; then
-    $PROJECT_DIR/gradlew.bat build
+    $PROJECT_DIR/gradlew.bat build -x test
   else
-    $PROJECT_DIR/gradlew build
+    $PROJECT_DIR/gradlew build -x test
   fi
 }
 

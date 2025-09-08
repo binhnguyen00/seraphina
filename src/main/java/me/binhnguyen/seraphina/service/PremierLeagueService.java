@@ -67,8 +67,10 @@ public class PremierLeagueService {
       Matchup exist = matchupRepo.getByCode(code);
 
       if (Objects.isNull(exist)) {
+        matchup.setSeason(season);
         toCreates.add(matchup);
       } else {
+        exist.setSeason(season);
         exist.setHome(matchup.getHome());
         exist.setAway(matchup.getAway());
         exist.setMatchDay(matchup.getMatchDay());
