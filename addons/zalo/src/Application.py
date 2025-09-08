@@ -19,7 +19,7 @@ bot = Bot(token=BOT_TOKEN)
 app = Flask(__name__)
 
 class Request(BaseModel):
-  user_id: str
+  chat_id: str
   message: str
 
 class Response(BaseModel):
@@ -96,9 +96,12 @@ def webhook():
   ).to_dict()
 
 @app.route('/send-message', methods=['POST'])
-async def send_message(request: Request):
+async def send_message():
+  data = request.get_json()
+  req = Request(**data)
+
   try:
-    await bot.send_message(chat_id=request.user_id, text=request.message)
+    await bot.send_message(chat_id=req.chat_id, text=req.message)
     return Response(
       status=200,
       success=True,

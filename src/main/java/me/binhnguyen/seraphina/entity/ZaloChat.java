@@ -5,11 +5,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.binhnguyen.seraphina.common.BaseEntity;
 
 @Table(name = ZaloChat.TABLE_NAME)
 @Entity
+@NoArgsConstructor
 @AllArgsConstructor
 public class ZaloChat extends BaseEntity {
   public static final String TABLE_NAME = "zalo_chat";

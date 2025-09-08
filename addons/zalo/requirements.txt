@@ -1,7 +1,7 @@
 python-zalo-bot
 python-dotenv
 httpx
-flask
+flask[async]
 uvicorn
 requests
 pydantic

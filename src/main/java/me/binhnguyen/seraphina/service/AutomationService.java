@@ -14,6 +14,7 @@ import java.util.List;
 public class AutomationService {
   private final SeasonService seasonService;
   private final CrawlerService crawlerService;
+  private final PremierLeagueService premierLeagueService;
 
   /** runs at 00:00:00 on the first day of every month */
   @Transactional
@@ -28,6 +29,6 @@ public class AutomationService {
   @Transactional
   @Scheduled(cron = "0 0 0 1 * ?")
   public void checkForPendingMatches() {
-  }
 
+  }
 }
