@@ -1,1 +1,3 @@
 python-zalo-bot
+dotenv
+httpx
