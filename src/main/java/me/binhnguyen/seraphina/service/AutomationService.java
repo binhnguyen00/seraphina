@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import me.binhnguyen.seraphina.entity.Matchup;
 import me.binhnguyen.seraphina.entity.Season;
-import me.binhnguyen.seraphina.entity.ZaloChat;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +18,9 @@ public class AutomationService {
   private final CrawlerService crawlerService;
   private final PremierLeagueService premierLeagueService;
 
-  /** runs at 00:00:00 on the first day of every month */
+  /**
+   * runs at 00:00:00 on the first day of every month
+   */
   @Transactional
   @Scheduled(cron = "0 0 0 1 * ?")
   public void updateCurrentSeason() {
@@ -29,13 +30,15 @@ public class AutomationService {
     seasonService.save(record);
   }
 
-  /** runs daily at 07:00
+  /**
+   * runs daily at 07:00
    * 0 → seconds
    * 0 → minutes
    * 7 → hour (07:00)
    * '*' → every day of the month
    * '*' → every month
-   * '?' → no specific day-of-week */
+   * '?' → no specific day-of-week
+   */
   @Transactional
   @Scheduled(cron = "0 0 7 * * ?")
   public void updateMatches() {
@@ -43,7 +46,9 @@ public class AutomationService {
     premierLeagueService.createOrUpdateMatches(season);
   }
 
-  /** runs at 07:00 on every Friday, Saturday, and Sunday. every month*/
+  /**
+   * runs at 07:00 on every Friday, Saturday, and Sunday. every month
+   */
   @Transactional
   @Scheduled(cron = "0 0 9 ? * FRI,SAT,SUN")
   public void notifyZalo() {

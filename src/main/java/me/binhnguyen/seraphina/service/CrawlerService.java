@@ -2,6 +2,7 @@ package me.binhnguyen.seraphina.service;
 
 import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.Season;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +17,20 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class CrawlerService {
-  private final String baseUrl = "https://site.api.espn.com/apis/site/v2/sports/soccer";
-  private final String leagueId = "eng.1";
-  private final RestTemplate restTemplate = new RestTemplate();
+  private final String baseUrl;
+  private final String leagueId;
+  private final RestTemplate restTemplate;
+
+  @Autowired
+  public CrawlerService(RestTemplate restTemplate) {
+    this.baseUrl = "https://site.api.espn.com/apis/site/v2/sports/soccer";
+    this.leagueId = "eng.1"; // Premier League
+    this.restTemplate = restTemplate;
+  }
 
   private Map<String, Object> callApi(String url) {
-    ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
+    ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+    });
     Map<String, Object> body = response.getBody();
     if (Objects.isNull(body)) {
       log.error("API response is undefined");
@@ -86,7 +95,9 @@ public class CrawlerService {
     return matchesHolder;
   }
 
-  /** pull this week matches */
+  /**
+   * pull this week matches
+   */
   public List<Map<String, Object>> pullMatches(Season season) {
     Objects.requireNonNull(season, "Season is required");
 
@@ -102,7 +113,9 @@ public class CrawlerService {
     return this.pullScheduleMatches(dates);
   }
 
-  /** pull matches by date range */
+  /**
+   * pull matches by date range
+   */
   public List<Map<String, Object>> pullMatchesByDate(Season season, LocalDate from, LocalDate to) {
     Objects.requireNonNull(season, "Season is required");
     Objects.requireNonNull(from, "From date is required");
@@ -119,7 +132,8 @@ public class CrawlerService {
       url,
       HttpMethod.GET,
       null,
-      new ParameterizedTypeReference<>() {}
+      new ParameterizedTypeReference<>() {
+      }
     );
     Map<String, Object> body = response.getBody();
     if (Objects.isNull(body)) {

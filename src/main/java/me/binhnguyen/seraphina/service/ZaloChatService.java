@@ -1,7 +1,6 @@
 package me.binhnguyen.seraphina.service;
 
 import lombok.extern.slf4j.Slf4j;
-import me.binhnguyen.seraphina.entity.Matchup;
 import me.binhnguyen.seraphina.entity.ZaloChat;
 import me.binhnguyen.seraphina.repository.ZaloChatRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +72,8 @@ public class ZaloChatService {
         url,
         HttpMethod.POST,
         new HttpEntity<>(payload),
-        new ParameterizedTypeReference<>() {}
+        new ParameterizedTypeReference<>() {
+        }
       );
 
       Map<String, Object> body = response.getBody();
