@@ -8,10 +8,10 @@ import lombok.Getter;
 import lombok.Setter;
 import me.binhnguyen.seraphina.common.BaseEntity;
 
-@Table(name = RegisterChat.TABLE_NAME)
+@Table(name = ZaloChat.TABLE_NAME)
 @Entity
 @AllArgsConstructor
-public class RegisterChat extends BaseEntity {
+public class ZaloChat extends BaseEntity {
   public static final String TABLE_NAME = "register_chat";
 
   @Getter @Setter

@@ -38,8 +38,4 @@ abstract public class BaseEntity implements Persistable<Long>, Serializable {
   public boolean isNew() {
     return Objects.isNull(this.id);
   }
-
-  public boolean exists() {
-    return !this.isNew();
-  }
 }

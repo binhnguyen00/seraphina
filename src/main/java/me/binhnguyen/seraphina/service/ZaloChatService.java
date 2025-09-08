@@ -2,8 +2,8 @@ package me.binhnguyen.seraphina.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.binhnguyen.seraphina.entity.RegisterChat;
-import me.binhnguyen.seraphina.repository.RegisterChatRepo;
+import me.binhnguyen.seraphina.entity.ZaloChat;
+import me.binhnguyen.seraphina.repository.ZaloChatRepo;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -11,21 +11,21 @@ import java.util.Objects;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RegisterChatService {
-  private final RegisterChatRepo repo;
+public class ZaloChatService {
+  private final ZaloChatRepo repo;
 
-  public RegisterChat registerChat(String lookupId, String name) {
-    RegisterChat exist = repo.getByLookupId(lookupId);
+  public ZaloChat registerChat(String lookupId, String name) {
+    ZaloChat exist = repo.getByLookupId(lookupId);
     if (!Objects.isNull(exist)) {
       log.warn("Chat {} with {} already registered", lookupId, name);
       return exist;
     }
-    RegisterChat record = new RegisterChat(lookupId, name);
+    ZaloChat record = new ZaloChat(lookupId, name);
     return repo.save(record);
   }
 
   public boolean unregisterChat(String lookupId) {
-    RegisterChat exist = repo.getByLookupId(lookupId);
+    ZaloChat exist = repo.getByLookupId(lookupId);
     if (Objects.isNull(exist)) {
       log.warn("Chat {} not found", lookupId);
       return false;
