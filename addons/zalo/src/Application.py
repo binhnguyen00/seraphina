@@ -1,13 +1,18 @@
 import os;
+import json;
+import requests;
 
 from zalo_bot import Bot;
 from pydantic import BaseModel;
 from fastapi import FastAPI, status;
 from typing import Optional;
+from dotenv import load_dotenv;
 
-BOT_TOKEN: Optional[str] = os.getenv("ZALO_BOT_TOKEN")
+load_dotenv()
+
+BOT_TOKEN: Optional[str] = os.getenv("BOT_TOKEN")
 if (not BOT_TOKEN):
-  raise ValueError("ZALO_BOT_TOKEN is not set")
+  raise ValueError("BOT_TOKEN is not set")
 
 bot = Bot(token=BOT_TOKEN)
 app = FastAPI(title="Zalo Bot", version="1.0.0", description="Zalo Bot Microservice which send message to registered users")
@@ -20,6 +25,7 @@ class Response(BaseModel):
   status: int
   success: bool
   message: str
+  data: Optional[dict] = None
 
 @app.post('/send-message')
 async def send_message(request: Request):
@@ -37,8 +43,29 @@ async def send_message(request: Request):
       message=str(e)
     )
 
+@app.get('/me')
+async def get_me():
+  entrypoint: str = f"https://bot-api.zapps.me/bot{BOT_TOKEN}/getMe"
+  response: requests.Response = requests.get(url=entrypoint)
+  response_data: dict = response.json()
+  result: dict = response_data.get("result", {})
+  
+  if (not result.get("ok", False)):
+    return Response(
+      status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+      success=False,
+      message="Get me failed"
+    )
+
+  return Response(
+    status=status.HTTP_200_OK,
+    success=True, 
+    message="Get me successfully",
+    data=result
+  )
+
 @app.get('/health')
-async def health_check():
+def health_check():
   return Response(
     status=status.HTTP_200_OK,
     success=True,
