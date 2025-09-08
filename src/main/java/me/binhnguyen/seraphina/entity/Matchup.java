@@ -20,9 +20,11 @@ public class Matchup extends BaseEntity {
   private String code;
 
   @Getter @Setter
+  @Column(nullable = false)
   private String home;
 
   @Getter @Setter
+  @Column(nullable = false)
   private String away;
 
   @Getter @Setter
