@@ -12,7 +12,7 @@ import me.binhnguyen.seraphina.common.BaseEntity;
 @Entity
 @AllArgsConstructor
 public class ZaloChat extends BaseEntity {
-  public static final String TABLE_NAME = "register_chat";
+  public static final String TABLE_NAME = "zalo_chat";
 
   @Getter @Setter
   @Column(name = "lookup_id", nullable = false)

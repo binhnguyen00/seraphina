@@ -1,5 +1,6 @@
 import os;
 import requests;
+import secrets;
 
 from flask import Flask, request;
 from zalo_bot import Bot, Update;
@@ -36,27 +37,41 @@ class Response(BaseModel):
     }
 
 async def start(update: Update, context):
+  """ idk what event is this """
   if (not update.effective_user):
     return
 
-  await update.message.reply_text(f"Xin chào {update.effective_user.display_name}!") # type: ignore
-  chat_id: str = update.effective_user.id
-  # TODO: save chat_id
+  await update.message.reply_text(f"Xin chào {update.effective_user.display_name}!\n Đã đăng ký nhận thông báo thành công!") # type: ignore
+
+  chat_id: Optional[str] = update.effective_user.id
+  chat_name: Optional[str] = update.effective_user.display_name
+  response: requests.Response = requests.post(url="http://localhost:8080/zalo/chat/subscribe", json={"chat_id": chat_id, "chat_name": chat_name})
+  response_data: dict = response.json()
+
+  if (not response_data.get("success", False)):
+    await update.message.reply_text(f"Đăng ký thất bại!") # type: ignore
+    return
 
 async def echo(update: Update, context):
-  print(update.effective_user.id) # type: ignore
+  """ user sent message event """
   if (not update.message):
     return
-  await update.message.reply_text(f"Bạn vừa nói: {update.message.text}") # type: ignore
+
+  chat_id: Optional[str] = update.effective_user.id # type: ignore
+  chat_name: Optional[str] = update.effective_user.display_name # type: ignore
+  response: requests.Response = requests.post(url="http://localhost:8080/zalo/chat/subscribe", json={"chat_id": chat_id, "chat_name": chat_name})
+  response_data: dict = response.json()
+
+  if (not response_data.get("success", False)):
+    await update.message.reply_text(f"Đăng ký thất bại!") # type: ignore
+    return
 
 with app.app_context():
   webhook_url: Optional[str] = os.getenv("WEBHOOK_URL")
-  print(webhook_url)
-  secret_token: Optional[str] = os.getenv("WEBHOOK_SECRET_TOKEN")
-  print(secret_token)
-  if (not webhook_url or not secret_token):
-    raise ValueError("WEBHOOK_URL or WEBHOOK_SECRET_TOKEN is not set")
+  if (not webhook_url):
+    raise ValueError("WEBHOOK_URL is not set")
 
+  secret_token: Optional[str] = secrets.token_hex(32)
   bot.set_webhook(url=webhook_url, secret_token=secret_token)
 
   dispatcher = Dispatcher(bot, None, workers=0)

@@ -14,11 +14,11 @@ import java.util.Map;
 public class ZaloChatController {
   private final ZaloChatService zaloChatService;
 
-  @PostMapping("/register")
-  public ResponseEntity<Map<String, Object>> registerChat(@RequestBody Map<String, Object> request) {
-    String lookupId   = String.valueOf(request.get("lookup_id"));
-    String name       = String.valueOf(request.get("name"));
-    ZaloChat chat = zaloChatService.registerChat(lookupId, name);
+  @PostMapping("/subscribe")
+  public ResponseEntity<Map<String, Object>> subscribeChat(@RequestBody Map<String, Object> request) {
+    String lookupId   = String.valueOf(request.get("chat_id"));
+    String name       = String.valueOf(request.get("chat_name"));
+    ZaloChat chat = zaloChatService.subscribeChat(lookupId, name);
 
     boolean success = !chat.isNew();
     if (!success) {
@@ -34,9 +34,9 @@ public class ZaloChatController {
     ));
   }
 
-  @PostMapping("/unregister")
-  public ResponseEntity<Map<String, Object>> unregisterChat(@RequestParam("lookup_id") String lookupId) {
-    boolean success = zaloChatService.unregisterChat(lookupId);
+  @PostMapping("/unsubscribe")
+  public ResponseEntity<Map<String, Object>> unsubscribeChat(@RequestParam("chat_id") String chatId) {
+    boolean success = zaloChatService.unsubscribeChat(chatId);
     if (!success) {
       ResponseEntity.ok(Map.of(
         "success", false,
