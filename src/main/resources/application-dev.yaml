@@ -4,7 +4,7 @@ logging:
     me.binhnguyen: INFO
 
 server:
-  port: 7080
+  port: 8080
 
 spring:
   datasource:
