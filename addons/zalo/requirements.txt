@@ -1,3 +1,5 @@
 python-zalo-bot
-dotenv
+python-dotenv
 httpx
+fastapi
+uvicorn
