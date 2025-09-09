@@ -72,10 +72,10 @@ async def help(update: Update, context):
 - Đây là tin nhắn tự động, bạn không cần phải phản hồi gì cả.
 - Chúng tôi cung cấp thông tin lịch đá bóng hàng tuần của các đội tại giải Ngoại Hạng Anh. Lịch đá sẽ được gửi hàng tuần.
 
-Đăng ký bằng cú pháp:
+Đăng ký nhận thông báo bằng cú pháp:
     /dangky
 
-Hủy đăng ký bằng cú pháp:
+Hủy đăng ký nhận thông báo bằng cú pháp:
     /huydangky
 
 Xem lịch tuần này bằng cú pháp:

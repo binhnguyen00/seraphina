@@ -48,7 +48,7 @@ public class SeasonController {
     for (int i = 0; i < thisWeekMatches.size(); i++) {
       Matchup match = thisWeekMatches.get(i);
       builder.append(String.format("""
-      %d ⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️
+      %d ------------------------------------
       Đội nhà\t%s
       Đội khách\t%s
       Giờ đá\t%s
