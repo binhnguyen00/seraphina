@@ -53,7 +53,8 @@ public class ZaloChatService {
       return false;
     }
     try {
-      return repo.deleteByLookupId(exist.getLookupId());
+      int numb = repo.deleteByLookupId(exist.getLookupId());
+      return numb > 0;
     } catch (Exception e) {
       log.error("Failed to unregister chat {}", lookupId, e);
       return false;

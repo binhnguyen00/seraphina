@@ -3,25 +3,38 @@ package me.binhnguyen.seraphina.controller;
 import lombok.RequiredArgsConstructor;
 import me.binhnguyen.seraphina.entity.Matchup;
 import me.binhnguyen.seraphina.entity.Season;
+import me.binhnguyen.seraphina.entity.ZaloChat;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
 import me.binhnguyen.seraphina.service.SeasonService;
+import me.binhnguyen.seraphina.service.ZaloChatService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/season")
 public class SeasonController {
   private final SeasonService seasonService;
+  private final ZaloChatService zaloChatService;
   private final PremierLeagueService premierLeagueService;
 
   @GetMapping("/schedule/matches")
-  public ResponseEntity<Map<String, Object>> getScheduleMatches() {
+  public ResponseEntity<Map<String, Object>> getScheduleMatches(@RequestParam("chat_id") String chatId) {
+    ZaloChat exist = zaloChatService.getSubscriber(chatId);
+    if (Objects.isNull(exist)) {
+      return ResponseEntity.ok(Map.of(
+        "success", false,
+        "message", "Bạn chưa đăng ký!"
+      ));
+    }
+
     Season season = seasonService.getOrCreate();
     List<Matchup> thisWeekMatches = premierLeagueService.getMatches(season);
     if (thisWeekMatches.isEmpty()) {
@@ -36,10 +49,10 @@ public class SeasonController {
       Matchup match = thisWeekMatches.get(i);
       builder.append(String.format("""
       %d ⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️
-      Đội nhà    %s
-      Đội khách  %s
-      Giờ đá     %s
-      Địa điểm   %s
+      Đội nhà\t%s
+      Đội khách\t%s
+      Giờ đá\t%s
+      Địa điểm\t%s
       
       """,
         i + 1,

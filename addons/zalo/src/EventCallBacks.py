@@ -40,7 +40,7 @@ async def unsubscribe(update: Update, context):
   await update.message.reply_text(f"Tạm biệt {update.effective_user.display_name}! Cảm ơn bạn và hẹn gặp lại!") # type: ignore
 
   target_id: Optional[str] = update.effective_user.id
-  response = requests.post(url="http://localhost:8080/zalo/chat/unsubscribe", json={"chat_id": target_id})
+  response = requests.post(url="http://localhost:8080/zalo/chat/unsubscribe", params={"chat_id": target_id})
   response_data: dict = response.json()
 
   if (not response_data.get("success", False)):
@@ -54,7 +54,7 @@ async def get_schedule(update: Update, context):
   if (not update.effective_user):
     return
 
-  response = requests.get(url="http://localhost:8080/season/schedule/matches")
+  response = requests.get(url="http://localhost:8080/season/schedule/matches", params={ "chat_id": update.effective_user.id })
   response_data: dict = response.json()
   if (not response_data.get("success", False)):
     message: str = response_data.get("message", "")
@@ -73,12 +73,12 @@ async def help(update: Update, context):
 - Chúng tôi cung cấp thông tin lịch đá bóng hàng tuần của các đội tại giải Ngoại Hạng Anh. Lịch đá sẽ được gửi hàng tuần.
 
 Đăng ký bằng cú pháp:
-    /đăng ký
+    /dangky
 
 Hủy đăng ký bằng cú pháp:
-    /hủy đăng ký
+    /huydangky
 
 Xem lịch tuần này bằng cú pháp:
-    /lịch tuần
+    /lichtuan
   """
   await update.message.reply_text(message) # type: ignore

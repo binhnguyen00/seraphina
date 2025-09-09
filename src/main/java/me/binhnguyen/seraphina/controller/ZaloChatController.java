@@ -17,8 +17,17 @@ public class ZaloChatController {
 
   @PostMapping("/subscribe")
   public ResponseEntity<Map<String, Object>> subscribeChat(@RequestBody Map<String, Object> request) {
-    String lookupId   = String.valueOf(request.get("chat_id"));
-    String name       = String.valueOf(request.get("chat_name"));
+    String lookupId = String.valueOf(request.get("chat_id"));
+    String name = String.valueOf(request.get("chat_name"));
+
+    ZaloChat exist = zaloChatService.getSubscriber(lookupId);
+    if (Objects.nonNull(exist)) {
+      return ResponseEntity.ok(Map.of(
+        "success", false,
+        "message", "Chat already registered"
+      ));
+    }
+
     ZaloChat chat = zaloChatService.subscribe(lookupId, name);
 
     boolean success = !chat.isNew();
@@ -61,7 +70,7 @@ public class ZaloChatController {
       ));
     }
     return ResponseEntity.ok(Map.of(
-      "success", success,
+      "success", true,
       "message", "Chat unregistered successfully"
     ));
   }
