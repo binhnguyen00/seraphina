@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import me.binhnguyen.seraphina.entity.Matchup;
 import me.binhnguyen.seraphina.entity.Season;
+import me.binhnguyen.seraphina.entity.ZaloChat;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -54,15 +55,25 @@ public class AutomationService {
   public void notifyZalo() {
     Season season = seasonService.getCurrentSeason();
     List<Matchup> thisWeekMatches = premierLeagueService.getMatches(season);
-    StringBuilder stringBuild = new StringBuilder();
-    for (Matchup match : thisWeekMatches) {
-      stringBuild.append("⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️");
-      stringBuild.append(String.format("Đội nhà %s", match.getHome()));
-      stringBuild.append(String.format("Đội khách %s", match.getAway()));
-      stringBuild.append(String.format("Giờ đá %s", match.getMatchDay()));
-      stringBuild.append(String.format("Địa điểm %s", match.getHomeStadium()));
-      stringBuild.append("\n");
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < thisWeekMatches.size(); i++) {
+      Matchup match = thisWeekMatches.get(i);
+      builder.append(String.format("""
+      %d ------------------------------------
+      Đội nhà\t%s
+      Đội khách\t%s
+      Giờ đá\t%s
+      Địa điểm\t%s
+      
+      """,
+        i + 1,
+        match.getHome(),
+        match.getAway(),
+        match.getFormatMatchDay(),
+        match.getHomeStadium()
+      ));
     }
-    zaloService.sendMessage(stringBuild.toString());
+    List<ZaloChat> subscribers = zaloService.getAllSubscribers();
+    zaloService.sendMessageTo(subscribers, builder.toString());
   }
 }

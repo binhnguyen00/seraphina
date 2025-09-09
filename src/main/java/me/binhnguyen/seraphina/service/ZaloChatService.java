@@ -36,6 +36,10 @@ public class ZaloChatService {
     return repo.getByLookupId(lookupId);
   }
 
+  public List<ZaloChat> getAllSubscribers() {
+    return repo.findAll();
+  }
+
   public ZaloChat subscribe(String lookupId, String name) {
     ZaloChat exist = repo.getByLookupId(lookupId);
     if (!Objects.isNull(exist)) {
@@ -61,8 +65,7 @@ public class ZaloChatService {
     }
   }
 
-  public List<ZaloChat> sendMessage(String message) {
-    List<ZaloChat> subscribers = repo.findAll();
+  public List<ZaloChat> sendMessageTo(List<ZaloChat> subscribers, String message) {
     String url = String.format("%s/send-message", this.zaloMicroServiceUrl);
 
     List<ZaloChat> failHolder = new ArrayList<>();
