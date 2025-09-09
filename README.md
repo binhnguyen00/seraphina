@@ -10,6 +10,11 @@
 - Webhook
 - Zalo Bot
 
+## Docker
+```bash
+docker compose up --build
+```
+
 ## Author - Binh Nguyen
 - **[Github](https://github.com/binhnguyen00)**
 - **[Gmail](mailto:jackjack2000.kahp@gmail.com)**
