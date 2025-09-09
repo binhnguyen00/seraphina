@@ -40,3 +40,18 @@ dependencies {
 test {
   useJUnitPlatform()
 }
+
+jar {
+  enabled = true
+}
+
+tasks.register("dockerBuild") {
+  dependsOn bootJar
+  doLast {
+    println("Docker build completed. JAR at: build/libs/app.jar")
+  }
+}
+
+bootJar {
+  archiveFileName.set("app.jar")
+}

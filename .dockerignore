@@ -1,0 +1,9 @@
+.idea
+.gradle
+.env
+.gitignore
+.vscode
+.git
+build
+README.md
+LICENSE
