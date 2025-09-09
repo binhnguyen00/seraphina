@@ -15,14 +15,14 @@ from EventCallBacks import subscribe, unsubscribe, get_schedule, help;
 
 app = Flask(__name__)
 with app.app_context():
-  BOT_TOKEN: Optional[str] = os.getenv("BOT_TOKEN")
+  BOT_TOKEN: Optional[str] = os.getenv("MICROSERVICE_ZALO_BOT_TOKEN")
   if (not BOT_TOKEN):
-    raise ValueError("BOT_TOKEN is not set")
+    raise ValueError("MICROSERVICE_ZALO_BOT_TOKEN is not set")
 
   WEBHOOK_SECRET_TOKEN: Optional[str] = secrets.token_hex(32)
-  WEBHOOK_URL: Optional[str] = os.getenv("WEBHOOK_URL")
+  WEBHOOK_URL: Optional[str] = os.getenv("MICROSERVICE_ZALO_WEBHOOK_URL")
   if (not WEBHOOK_URL):
-    raise ValueError("WEBHOOK_URL is not set")
+    raise ValueError("MICROSERVICE_ZALO_WEBHOOK_URL is not set")
 
   bot = Bot(token=BOT_TOKEN)
   bot.set_webhook(url=WEBHOOK_URL, secret_token=WEBHOOK_SECRET_TOKEN)
@@ -100,8 +100,8 @@ def health_check():
   ).to_dict()
 
 if (__name__ == '__main__'):
-  PORT: Optional[str] = os.getenv("PORT")
+  PORT: Optional[str] = os.getenv("MICROSERVICE_ZALO_PORT")
   if (not PORT):
-    raise ValueError("PORT is not set")
+    raise ValueError("MICROSERVICE_ZALO_PORT is not set")
 
-  app.run(port=int(PORT))
+  app.run(host="0.0.0.0", port=int(PORT))

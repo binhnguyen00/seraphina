@@ -33,6 +33,34 @@ services:
       postgres:
         condition: service_healthy
 
+  zalo:
+    build:
+      context: ./addons/zalo
+      dockerfile: dockerfile
+    container_name: zalo_bot
+    ports:
+      - "${MICROSERVICE_ZALO_PORT}:${MICROSERVICE_ZALO_PORT}"
+    volumes:
+      - ./logs:/logs
+    environment:
+      - MICROSERVICE_ZALO_PORT=${MICROSERVICE_ZALO_PORT}
+      - MICROSERVICE_ZALO_BOT_TOKEN=${MICROSERVICE_ZALO_BOT_TOKEN}
+      - MICROSERVICE_ZALO_WEBHOOK_URL=${MICROSERVICE_ZALO_WEBHOOK_URL}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${MICROSERVICE_ZALO_PORT}/health || exit 1"]
+      interval: 5s
+      retries: 5
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok_tunnel
+    command: http --url=peaceful-partly-alpaca.ngrok-free.app zalo:${MICROSERVICE_ZALO_PORT}
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+      - MICROSERVICE_ZALO_PORT=${MICROSERVICE_ZALO_PORT}
+    depends_on:
+      - zalo
+
 volumes:
   postgres_data:
   logs:
