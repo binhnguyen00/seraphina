@@ -48,11 +48,10 @@ public class PremierLeagueController {
     for (int i = 0; i < thisWeekMatches.size(); i++) {
       Matchup match = thisWeekMatches.get(i);
       builder.append(String.format("""
-      %d ------------------------------------
-      Đội nhà\t%s
-      Đội khách\t%s
-      Giờ đá\t%s
-      Địa điểm\t%s
+      %d ⚽️
+      %s vs %s
+      %s
+      Sân %s
       
       """,
         i + 1,
