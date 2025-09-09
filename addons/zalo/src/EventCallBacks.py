@@ -54,7 +54,7 @@ async def get_schedule(update: Update, context):
   if (not update.effective_user):
     return
 
-  response = requests.get(url="http://localhost:8080/season/schedule/matches", params={ "chat_id": update.effective_user.id })
+  response = requests.get(url="http://localhost:8080//premier-league/schedule/matches", params={ "chat_id": update.effective_user.id })
   response_data: dict = response.json()
   if (not response_data.get("success", False)):
     message: str = response_data.get("message", "")
