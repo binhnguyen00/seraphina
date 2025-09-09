@@ -56,10 +56,11 @@ public class AutomationService {
     List<Matchup> thisWeekMatches = premierLeagueService.getMatches(season);
     StringBuilder stringBuild = new StringBuilder();
     for (Matchup match : thisWeekMatches) {
-      stringBuild.append("========================");
-      stringBuild.append(String.format("Home %s", match.getHome()));
-      stringBuild.append(String.format("Away %s", match.getAway()));
-      stringBuild.append(String.format("Date %s", match.getMatchDay()));
+      stringBuild.append("⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️");
+      stringBuild.append(String.format("Đội nhà %s", match.getHome()));
+      stringBuild.append(String.format("Đội khách %s", match.getAway()));
+      stringBuild.append(String.format("Giờ đá %s", match.getMatchDay()));
+      stringBuild.append(String.format("Địa điểm %s", match.getHomeStadium()));
       stringBuild.append("\n");
     }
     zaloService.sendMessage(stringBuild.toString());

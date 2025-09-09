@@ -32,7 +32,11 @@ public class ZaloChatService {
     this.zaloMicroServiceUrl = zaloMicroServiceUrl;
   }
 
-  public ZaloChat subscribeChat(String lookupId, String name) {
+  public ZaloChat getSubscriber(String lookupId) {
+    return repo.getByLookupId(lookupId);
+  }
+
+  public ZaloChat subscribe(String lookupId, String name) {
     ZaloChat exist = repo.getByLookupId(lookupId);
     if (!Objects.isNull(exist)) {
       log.warn("Chat {} with {} already registered", lookupId, name);
@@ -42,7 +46,7 @@ public class ZaloChatService {
     return repo.save(record);
   }
 
-  public boolean unsubscribeChat(String lookupId) {
+  public boolean unsubscribe(String lookupId) {
     ZaloChat exist = repo.getByLookupId(lookupId);
     if (Objects.isNull(exist)) {
       log.warn("Chat {} not found", lookupId);

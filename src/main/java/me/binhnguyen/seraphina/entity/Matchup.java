@@ -1,9 +1,11 @@
 package me.binhnguyen.seraphina.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import me.binhnguyen.seraphina.common.BaseEntity;
+import me.binhnguyen.seraphina.common.DatePattern;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -37,6 +39,7 @@ public class Matchup extends BaseEntity {
   private String homeStadium;
 
   @Getter @Setter
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DatePattern.READABLE_DATETIME)
   @Column(name = "match_day")
   private OffsetDateTime matchDay;
 
@@ -51,6 +54,10 @@ public class Matchup extends BaseEntity {
   public String getOrCreateCode() {
     this.generateCode();
     return this.code;
+  }
+
+  public String getFormatMatchDay() {
+    return this.matchDay.format(DateTimeFormatter.ofPattern(DatePattern.READABLE_DATETIME));
   }
 
   @PrePersist

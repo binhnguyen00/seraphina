@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @RestController
@@ -18,7 +19,7 @@ public class ZaloChatController {
   public ResponseEntity<Map<String, Object>> subscribeChat(@RequestBody Map<String, Object> request) {
     String lookupId   = String.valueOf(request.get("chat_id"));
     String name       = String.valueOf(request.get("chat_name"));
-    ZaloChat chat = zaloChatService.subscribeChat(lookupId, name);
+    ZaloChat chat = zaloChatService.subscribe(lookupId, name);
 
     boolean success = !chat.isNew();
     if (!success) {
@@ -34,9 +35,25 @@ public class ZaloChatController {
     ));
   }
 
+  @GetMapping("/subscribe/get")
+  public ResponseEntity<Map<String, Object>> getSubscriber(@RequestParam("chat_id") String chatId) {
+    ZaloChat chat = zaloChatService.getSubscriber(chatId);
+    if (Objects.isNull(chat)) {
+      return ResponseEntity.ok(Map.of(
+        "success", false,
+        "message", "Chat not found"
+      ));
+    }
+    return ResponseEntity.ok(Map.of(
+      "success", true,
+      "data", chat.getLookupId(),
+      "message", "Chat found"
+    ));
+  }
+
   @PostMapping("/unsubscribe")
   public ResponseEntity<Map<String, Object>> unsubscribeChat(@RequestParam("chat_id") String chatId) {
-    boolean success = zaloChatService.unsubscribeChat(chatId);
+    boolean success = zaloChatService.unsubscribe(chatId);
     if (!success) {
       ResponseEntity.ok(Map.of(
         "success", false,

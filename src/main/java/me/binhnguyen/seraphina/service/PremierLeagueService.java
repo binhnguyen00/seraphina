@@ -9,6 +9,7 @@ import me.binhnguyen.seraphina.repository.MatchupRepo;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -120,21 +121,13 @@ public class PremierLeagueService {
   /** returns this week matches */
   public List<Matchup> getMatches(Season season) {
     List<LocalDate> thisWeekDates = season.getThisWeekMatchDays();
-    List<Matchup> matches = matchupRepo.getByMatchDayBetween(
-      thisWeekDates.getFirst(),
-      thisWeekDates.getLast()
-    );
+    OffsetDateTime from = thisWeekDates.getFirst().atStartOfDay(ZoneOffset.UTC).toOffsetDateTime();
+    OffsetDateTime to = thisWeekDates.getLast().atTime(LocalTime.MAX).atOffset(ZoneOffset.UTC);
+    List<Matchup> matches = matchupRepo.getByMatchDayBetween(from, to);
     if (matches.isEmpty()) {
       log.info("No matches found for this week {}", thisWeekDates);
       return Collections.emptyList();
     }
     return matches;
-  }
-
-  public List<Matchup> markNotified(List<Matchup> matchups) {
-    for (Matchup matchup : matchups) {
-      matchup.setNotified(true);
-    }
-    return matchupRepo.saveAll(matchups);
   }
 }

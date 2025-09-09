@@ -7,4 +7,5 @@ public class DatePattern {
   public static final String DATE = "dd-MM-yyyy";
   public static final String DATETIME = "dd-MM-yyyy@HH:mm";
   public static final String TIMESTAMP = "dd-MM-yyyyHH:mm:ss";
+  public static final String READABLE_DATETIME = "dd-MM-yyyy HH:mm:ss";
 }

@@ -22,7 +22,7 @@ public class ZaloTests {
 
   @BeforeEach
   void init() {
-    this.chat = service.subscribeChat("306e6075fc20157e4c31", "Binh Nguyen");
+    this.chat = service.subscribe("306e6075fc20157e4c31", "Binh Nguyen");
   }
 
   @Test
