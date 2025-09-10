@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,8 +38,9 @@ public class PremierLeagueController extends BaseController {
       );
     }
 
-    Season season = seasonService.getOrCreate();
-    List<Matchup> thisWeekMatches = premierLeagueService.getMatches(season);
+    int year = LocalDate.now().getYear();
+    Season season = seasonService.getSeason(year);
+    List<Matchup> thisWeekMatches = premierLeagueService.getCurrentWeekMatches(season);
     if (thisWeekMatches.isEmpty()) {
       return ResponseEntity.ok(
         response

@@ -2,18 +2,24 @@ package me.binhnguyen.seraphina.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import me.binhnguyen.seraphina.entity.MatchDay;
 import me.binhnguyen.seraphina.entity.Matchup;
 import me.binhnguyen.seraphina.entity.Season;
 import me.binhnguyen.seraphina.entity.ZaloChat;
+import me.binhnguyen.seraphina.repository.MatchupRepo;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AutomationService {
+  private final MatchupRepo matchupRepo;
+
   private final ZaloChatService zaloService;
   private final SeasonService seasonService;
   private final CrawlerService crawlerService;
@@ -25,7 +31,7 @@ public class AutomationService {
   @Transactional
   @Scheduled(cron = "0 0 0 1 * ?")
   public void updateCurrentSeason() {
-    List<LocalDate> matchDays = crawlerService.getCurrentSeasonScheduleMatchDays();
+    List<LocalDate> matchDays = crawlerService.pullCurrentSeasonScheduleMatchDays(PremierLeagueService.LEAGUE_ID);
     Season record = seasonService.getCurrentSeason();
     record.setMatchDays(matchDays);
     seasonService.save(record);
@@ -42,9 +48,13 @@ public class AutomationService {
    */
   @Transactional
   @Scheduled(cron = "0 0 7 * * ?")
-  public void updateMatches() {
-    Season season = seasonService.getCurrentSeason();
-    premierLeagueService.createOrUpdateMatches(season);
+  public void createOrUpdateMatches() {
+    List<MatchDay> matchDays = premierLeagueService.getThisWeekMatchDays();
+    if (matchDays.isEmpty()) return;
+    premierLeagueService.createOrUpdateMatches(
+      matchDays.getFirst().getDate(),
+      matchDays.getLast().getDate()
+    );
   }
 
   /**
@@ -54,7 +64,7 @@ public class AutomationService {
   @Scheduled(cron = "0 0 9 ? * FRI,SAT,SUN")
   public void notifyZalo() {
     Season season = seasonService.getCurrentSeason();
-    List<Matchup> thisWeekMatches = premierLeagueService.getMatches(season);
+    List<Matchup> thisWeekMatches = premierLeagueService.getCurrentWeekMatches(season);
     StringBuilder builder = new StringBuilder();
     for (int i = 0; i < thisWeekMatches.size(); i++) {
       Matchup match = thisWeekMatches.get(i);

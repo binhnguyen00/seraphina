@@ -1,36 +1,38 @@
 package me.binhnguyen.seraphina.service;
 
 import lombok.extern.slf4j.Slf4j;
-import me.binhnguyen.seraphina.entity.Season;
+import me.binhnguyen.seraphina.entity.MatchDay;
+import me.binhnguyen.seraphina.entity.Team;
+import me.binhnguyen.seraphina.repository.MatchDayRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class CrawlerService {
-  private final String leagueId;
   private final WebClient webClient;
+  private final MatchDayRepo matchDayRepo;
 
   @Autowired
-  public CrawlerService(@Qualifier("premierLeague") WebClient webClient) {
-    this.leagueId = "eng.1";
+  public CrawlerService(
+    @Qualifier("premierLeague") WebClient webClient,
+    MatchDayRepo matchDayRepo
+  ) {
     this.webClient = webClient;
+    this.matchDayRepo = matchDayRepo;
   }
 
   @SuppressWarnings("unchecked")
-  public List<java.util.Map<String, Object>> pullScheduleMatches(String dates) {
-    Objects.requireNonNull(dates, "Dates is required");
-    if (dates.isBlank()) {
-      log.error("Dates is empty or blank");
-      return new ArrayList<>();
-    }
+  public List<Map<String, Object>> pullMatchesByDateRange(String leagueId, LocalDate from, LocalDate to) {
+    String dates = String.format("%s-%s", from.toString().replace("-", ""), to.toString().replace("-", ""));
 
     Map<String, Object> response = webClient.get()
       .uri(uriBuilder -> uriBuilder
@@ -39,17 +41,17 @@ public class CrawlerService {
         .build(leagueId))
       .retrieve()
       .bodyToMono(Map.class)
-      .timeout(Duration.ofSeconds(10))
+      .timeout(Duration.ofSeconds(20))
       .block();
 
     if (Objects.isNull(response)) {
       log.error("pullScheduleMatches API has no response");
-      return new ArrayList<>();
+      return Collections.emptyList();
     }
-    ArrayList<Map<String, Object>> matches = (ArrayList<Map<String, Object>>) response.getOrDefault("events", new ArrayList<>());
+    ArrayList<Map<String, Object>> matches = (ArrayList<Map<String, Object>>) response.getOrDefault("events", Collections.emptyList());
     if (matches.isEmpty()) {
       log.error("Has no schedule matches");
-      return new ArrayList<>();
+      return Collections.emptyList();
     }
 
     List<Map<String, Object>> matchesHolder = new ArrayList<>();
@@ -60,8 +62,8 @@ public class CrawlerService {
       String startTime = match.getOrDefault("date", "").toString();
 
       // competitors
-      ArrayList<Map<String, Object>> competitions = (ArrayList<Map<String, Object>>) match.getOrDefault("competitions", new ArrayList<>());
-      ArrayList<Map<String, Object>> competitors = (ArrayList<Map<String, Object>>) competitions.getFirst().getOrDefault("competitors", new ArrayList<>());
+      ArrayList<Map<String, Object>> competitions = (ArrayList<Map<String, Object>>) match.getOrDefault("competitions", Collections.emptyList());
+      ArrayList<Map<String, Object>> competitors = (ArrayList<Map<String, Object>>) competitions.getFirst().getOrDefault("competitors", Collections.emptyList());
 
       List<Map<String, Object>> competitorsList = new ArrayList<>();
       competitors.forEach(competitor -> {
@@ -90,36 +92,35 @@ public class CrawlerService {
     return matchesHolder;
   }
 
-  /** pull this week matches */
-  public List<Map<String, Object>> pullMatches(Season season) {
-    Objects.requireNonNull(season, "Season is required");
+  /** pull this week matches from target league */
+  public List<Map<String, Object>> pullCurrentWeekMatches(String leagueId) {
+    Objects.requireNonNull(leagueId, "League is required");
 
-    List<LocalDate> thisWeekMatchDays = season.getThisWeekMatchDays();
-    if (thisWeekMatchDays.isEmpty()) {
-      log.error("This weekend has no match days");
-      return new ArrayList<>();
+    List<MatchDay> allMatchDays = matchDayRepo.getMatchDay(leagueId, LocalDate.now().getYear());
+    if (allMatchDays.isEmpty()) {
+      log.error("League {} in this weekend has no match days", leagueId);
+      return Collections.emptyList();
     }
-    String dates = thisWeekMatchDays
-      .stream()
-      .map(date -> date.toString().replace("-", ""))
-      .collect(Collectors.joining("-"));
-    return this.pullScheduleMatches(dates);
-  }
 
-  /** pull matches by date range */
-  public List<Map<String, Object>> pullMatchesByDate(Season season, LocalDate from, LocalDate to) {
-    Objects.requireNonNull(season, "Season is required");
-    Objects.requireNonNull(from, "From date is required");
-    Objects.requireNonNull(to, "To date is required");
-    // target result: "20250913-20250914"
-    String dates = String.format("%s-%s", from.toString().replace("-", ""), to.toString().replace("-", ""));
-    return this.pullScheduleMatches(dates);
+    LocalDate today = LocalDate.now();
+    LocalDate thisSaturday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
+    LocalDate thisSunday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+    List<MatchDay> thisWeekMatchDays = allMatchDays.stream()
+      .filter(matchDay -> matchDay.getDate().isAfter(today))
+      .filter(matchDay -> matchDay.getDate().equals(thisSaturday) || matchDay.getDate().equals(thisSunday))
+      .toList();
+
+    return this.pullMatchesByDateRange(
+      leagueId,
+      thisWeekMatchDays.getFirst().getDate(),
+      thisWeekMatchDays.getLast().getDate()
+    );
   }
 
   @SuppressWarnings("unchecked")
-  public List<LocalDate> getCurrentSeasonScheduleMatchDays() {
+  public List<LocalDate> pullCurrentSeasonScheduleMatchDays(String leagueId) {
     Map<String, Object> response = this.webClient.get()
-      .uri("/{leagueId}/scoreboard", this.leagueId)
+      .uri("/{leagueId}/scoreboard", leagueId)
       .retrieve()
       .bodyToMono(Map.class)
       .timeout(Duration.ofSeconds(10))
@@ -130,12 +131,12 @@ public class CrawlerService {
       return Collections.emptyList();
     }
 
-    List<Map<String, Object>> leagues = (List<Map<String, Object>>) response.getOrDefault("leagues", new ArrayList<>());
+    List<Map<String, Object>> leagues = (List<Map<String, Object>>) response.getOrDefault("leagues", Collections.emptyList());
     if (leagues.isEmpty()) log.error("getCurrentSeasonScheduleMatchDays has no leagues");
 
     Map<String, Object> league = leagues.getFirst();
     List<LocalDate> dates = new ArrayList<>();
-    List<String> calendar = (List<String>) league.getOrDefault("calendar", new ArrayList<>());
+    List<String> calendar = (List<String>) league.getOrDefault("calendar", Collections.emptyList());
     if (calendar.isEmpty()) {
       log.error("Has no calendar");
       return dates;
@@ -146,5 +147,56 @@ public class CrawlerService {
       dates.add(localDate);
     });
     return dates;
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<Team> pullTeams(String leagueId) {
+    Map<String, Object> response = this.webClient.get()
+      .uri("/{leagueId}/teams", leagueId)
+      .retrieve()
+      .bodyToMono(Map.class)
+      .timeout(Duration.ofSeconds(10))
+      .block();
+    if (Objects.isNull(response)) {
+      log.error("pullTeams API has no response");
+      return Collections.emptyList();
+    }
+
+    List<Map<String, Object>> sports = (List<Map<String, Object>>) response.getOrDefault("sports", Collections.emptyList());
+    if (sports.isEmpty()) {
+      log.error("pullTeams API has no sports");
+      return Collections.emptyList();
+    }
+
+    List<Map<String, Object>> leagues = (List<Map<String, Object>>) sports.getFirst().getOrDefault("leagues", Collections.emptyList());
+    if (leagues.isEmpty()) {
+      log.error("pullTeams API has no leagues");
+      return Collections.emptyList();
+    }
+
+    List<Map<String, Object>> teams = (List<Map<String, Object>>) leagues.getFirst().getOrDefault("teams", Collections.emptyList());
+    if (teams.isEmpty()) {
+      log.error("pullTeams API has no teams");
+      return Collections.emptyList();
+    }
+
+    List<Team> results = new ArrayList<>();
+    for (Map<String, Object> team : teams) {
+      Map<String, Object> data = (Map<String, Object>) team.getOrDefault("team", new HashMap<>());
+      String lookupId = String.valueOf(data.getOrDefault("id", ""));
+      if (lookupId.isBlank()) {
+        continue;
+      }
+      String name = String.valueOf(data.getOrDefault("name", ""));
+      String code = String.valueOf(data.getOrDefault("abbreviation", ""));
+      Team t = new Team(code, name);
+      t.setLookupId(lookupId);
+      results.add(t);
+    }
+
+    if (results.isEmpty())
+      return Collections.emptyList();
+
+    return results;
   }
 }

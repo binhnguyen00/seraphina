@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface SeasonRepo extends JpaRepository<Season, Persistence> {
 
   @Query("SELECT s FROM Season s WHERE s.year = :year")
-  Season getByYear(int year);
+  Season getByYear(String year);
 }

@@ -12,8 +12,8 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
-@Table(name = Season.TABLE_NAME)
 @Entity
+@Table(name = Season.TABLE_NAME)
 public class Season extends BaseEntity {
   public static final String TABLE_NAME = "match_day";
 
@@ -21,6 +21,7 @@ public class Season extends BaseEntity {
   @Column(name = "season_year", nullable = false)
   private String year;
 
+  @Deprecated
   @Getter @Setter
   @Column(name = "match_days")
   private List<LocalDate> matchDays;

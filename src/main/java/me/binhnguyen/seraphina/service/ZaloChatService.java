@@ -4,32 +4,28 @@ import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.ZaloChat;
 import me.binhnguyen.seraphina.repository.ZaloChatRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
 public class ZaloChatService {
+  private final WebClient webClient;
   private final ZaloChatRepo repo;
-  private final RestTemplate restTemplate;
-  private final String zaloMicroServiceUrl;
 
   @Autowired
   public ZaloChatService(
-    ZaloChatRepo repo,
-    RestTemplate restTemplate,
-    @Value("${zalo.microservice.url}") String zaloMicroServiceUrl
+    @Qualifier("microServiceZalo") WebClient webClient,
+    ZaloChatRepo repo
   ) {
+    this.webClient = webClient;
     this.repo = repo;
-    this.restTemplate = restTemplate;
-    this.zaloMicroServiceUrl = zaloMicroServiceUrl;
   }
 
   public ZaloChat getSubscriber(String lookupId) {
@@ -65,32 +61,29 @@ public class ZaloChatService {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public List<ZaloChat> sendMessageTo(List<ZaloChat> subscribers, String message) {
-    String url = String.format("%s/send-message", this.zaloMicroServiceUrl);
-
     List<ZaloChat> failHolder = new ArrayList<>();
     List<ZaloChat> successHolder = new ArrayList<>();
 
     for (ZaloChat subscriber : subscribers) {
-      Map<String, Object> payload = new HashMap<>();
-      payload.put("chat_id", subscriber.getLookupId());
-      payload.put("message", message);
+      Map<String, Object> response = this.webClient.post()
+        .uri(uriBuilder -> uriBuilder
+          .path("/send-message")
+          .queryParam("chat_id", subscriber.getLookupId())
+          .queryParam("message", message)
+          .build())
+        .retrieve()
+        .bodyToMono(Map.class)
+        .block();
 
-      ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-        url,
-        HttpMethod.POST,
-        new HttpEntity<>(payload),
-        new ParameterizedTypeReference<>() {
-        }
-      );
-
-      Map<String, Object> body = response.getBody();
-      if (Objects.isNull(body)) {
+      if (Objects.isNull(response)) {
+        log.error("sendMessageTo API has no response");
         failHolder.add(subscriber);
         continue;
       }
 
-      boolean success = Objects.equals(body.get("success"), false);
+      boolean success = Objects.equals(response.get("success"), false);
       if (success) {
         successHolder.add(subscriber);
       } else {

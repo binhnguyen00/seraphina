@@ -16,4 +16,13 @@ public class WebClientConfig {
       .defaultHeader("Content-Type", "application/json; charset=utf-8")
       .build();
   }
+
+  @Bean
+  @Qualifier("microServiceZalo")
+  public WebClient zaloWebClient() {
+    return WebClient.builder()
+      .baseUrl("http://localhost:8081")
+      .defaultHeader("Content-Type", "application/json; charset=utf-8")
+      .build();
+  }
 }

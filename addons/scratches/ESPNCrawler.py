@@ -1,3 +1,4 @@
+import json
 import requests;
 
 from requests import Response;
@@ -39,6 +40,28 @@ class ESPNPremierLeagueCrawler():
       #   team: dict = competitor.get("team", {})
       #   team_name: str = team.get("name", ""); print(team_name)
 
+  def get_all_teams(self) -> list[dict]:
+    """Get all Premier League teams"""
+    url: str = f"{self.base_url}/{self.league_id}/teams"
+
+    response: Response = requests.get(url=url)
+    response_data: dict = response.json()
+
+    teams: list[dict] = response_data.get("sports", [{}])[0].get("leagues", [{}])[0].get("teams", [])
+
+    team_info: list[dict] = []
+    for team_data in teams:
+      team: dict = team_data.get("team", {})
+      team_info.append({
+        "id": team.get("id"),
+        "name": team.get("displayName"),                           
+        "abbreviation": team.get("abbreviation"),
+      })
+
+    return team_info
+
 if __name__ == "__main__":
   crawler = ESPNPremierLeagueCrawler()
-  today_matches = crawler.get_schedule("20250913")
+  # today_matches = crawler.get_schedule("20250913")
+  teams = crawler.get_all_teams()
+  print(json.dumps(teams, indent=2))
