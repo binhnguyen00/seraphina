@@ -1,6 +1,7 @@
 package me.binhnguyen.seraphina.service;
 
 import lombok.extern.slf4j.Slf4j;
+import me.binhnguyen.seraphina.common.DataRecord;
 import me.binhnguyen.seraphina.entity.Season;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -28,19 +29,19 @@ public class CrawlerService {
     this.restTemplate = restTemplate;
   }
 
-  private Map<String, Object> callApi(String url) {
-    ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+  private DataRecord callApi(String url) {
+    ResponseEntity<DataRecord> response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
     });
-    Map<String, Object> body = response.getBody();
+    DataRecord body = response.getBody();
     if (Objects.isNull(body)) {
       log.error("API response is undefined");
-      return new HashMap<>();
+      return new DataRecord();
     }
     return body;
   }
 
   @SuppressWarnings("unchecked")
-  public List<Map<String, Object>> pullScheduleMatches(String dates) {
+  public List<DataRecord> pullScheduleMatches(String dates) {
     Objects.requireNonNull(dates, "Dates is required");
     if (dates.isBlank()) {
       log.error("Dates is empty or blank");
@@ -50,29 +51,29 @@ public class CrawlerService {
     final String url = String.format("%s/%s/scoreboard", this.baseUrl, this.leagueId);
     UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
     builder.queryParam("dates", dates);
-    Map<String, Object> body = this.callApi(builder.build().toUriString());
-    ArrayList<Map<String, Object>> matches = (ArrayList<Map<String, Object>>) body.getOrDefault("events", new ArrayList<>());
+    DataRecord body = this.callApi(builder.build().toUriString());
+    ArrayList<DataRecord> matches = (ArrayList<DataRecord>) body.getOrDefault("events", new ArrayList<>());
     if (matches.isEmpty()) {
       log.error("Has no schedule matches");
       return new ArrayList<>();
     }
 
-    List<Map<String, Object>> matchesHolder = new ArrayList<>();
+    List<DataRecord> matchesHolder = new ArrayList<>();
     matches.forEach(match -> {
-      Map<String, Object> simplified = new HashMap<>();
+      DataRecord simplified = new DataRecord();
 
       String label = match.getOrDefault("name", "").toString();
       String startTime = match.getOrDefault("date", "").toString();
 
       // competitors
-      ArrayList<Map<String, Object>> competitions = (ArrayList<Map<String, Object>>) match.getOrDefault("competitions", new ArrayList<>());
-      ArrayList<Map<String, Object>> competitors = (ArrayList<Map<String, Object>>) competitions.getFirst().getOrDefault("competitors", new ArrayList<>());
+      ArrayList<DataRecord> competitions = (ArrayList<DataRecord>) match.getOrDefault("competitions", new ArrayList<>());
+      ArrayList<DataRecord> competitors = (ArrayList<DataRecord>) competitions.getFirst().getOrDefault("competitors", new ArrayList<>());
 
-      List<Map<String, Object>> competitorsList = new ArrayList<>();
+      List<DataRecord> competitorsList = new ArrayList<>();
       competitors.forEach(competitor -> {
-        Map<String, Object> competitorMap = new HashMap<>();
+        DataRecord competitorMap = new DataRecord();
         String homeAway = competitor.getOrDefault("homeAway", "").toString();
-        Map<String, Object> team = (Map<String, Object>) competitor.getOrDefault("team", new HashMap<>());
+        DataRecord team = (DataRecord) competitor.getOrDefault("team", new DataRecord());
         String teamName = team.getOrDefault("name", "").toString();
 
         competitorMap.put("homeAway", homeAway);
@@ -98,7 +99,7 @@ public class CrawlerService {
   /**
    * pull this week matches
    */
-  public List<Map<String, Object>> pullMatches(Season season) {
+  public List<DataRecord> pullMatches(Season season) {
     Objects.requireNonNull(season, "Season is required");
 
     List<LocalDate> thisWeekMatchDays = season.getThisWeekMatchDays();
@@ -116,7 +117,7 @@ public class CrawlerService {
   /**
    * pull matches by date range
    */
-  public List<Map<String, Object>> pullMatchesByDate(Season season, LocalDate from, LocalDate to) {
+  public List<DataRecord> pullMatchesByDate(Season season, LocalDate from, LocalDate to) {
     Objects.requireNonNull(season, "Season is required");
     Objects.requireNonNull(from, "From date is required");
     Objects.requireNonNull(to, "To date is required");
@@ -128,23 +129,23 @@ public class CrawlerService {
   @SuppressWarnings("unchecked")
   public List<LocalDate> getCurrentSeasonScheduleMatchDays() {
     String url = String.format("%s/%s/scoreboard", this.baseUrl, this.leagueId);
-    ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+    ResponseEntity<DataRecord> response = restTemplate.exchange(
       url,
       HttpMethod.GET,
       null,
       new ParameterizedTypeReference<>() {
       }
     );
-    Map<String, Object> body = response.getBody();
+    DataRecord body = response.getBody();
     if (Objects.isNull(body)) {
       log.error("Schedule dates are not found");
       return Collections.emptyList();
     }
 
-    List<Map<String, Object>> leagues = (List<Map<String, Object>>) body.getOrDefault("leagues", new ArrayList<>());
+    List<DataRecord> leagues = (List<DataRecord>) body.getOrDefault("leagues", new ArrayList<>());
     if (leagues.isEmpty()) log.error("Has no leagues");
 
-    Map<String, Object> league = leagues.getFirst();
+    DataRecord league = leagues.getFirst();
     List<LocalDate> dates = new ArrayList<>();
     List<String> calendar = (List<String>) league.getOrDefault("calendar", new ArrayList<>());
     if (calendar.isEmpty()) {

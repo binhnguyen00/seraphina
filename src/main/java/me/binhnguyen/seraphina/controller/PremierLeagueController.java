@@ -1,6 +1,7 @@
 package me.binhnguyen.seraphina.controller;
 
 import lombok.RequiredArgsConstructor;
+import me.binhnguyen.seraphina.common.DataRecord;
 import me.binhnguyen.seraphina.entity.Matchup;
 import me.binhnguyen.seraphina.entity.Season;
 import me.binhnguyen.seraphina.entity.ZaloChat;
@@ -14,34 +15,36 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/premier-league")
-public class PremierLeagueController {
+public class PremierLeagueController extends BaseController {
   private final SeasonService seasonService;
   private final ZaloChatService zaloChatService;
   private final PremierLeagueService premierLeagueService;
 
   @GetMapping("/schedule/matches")
-  public ResponseEntity<Map<String, Object>> getScheduleMatches(@RequestParam("chat_id") String chatId) {
+  public ResponseEntity<DataRecord> getScheduleMatches(@RequestParam("chat_id") String chatId) {
+    DataRecord response = new DataRecord();
     ZaloChat exist = zaloChatService.getSubscriber(chatId);
     if (Objects.isNull(exist)) {
-      return ResponseEntity.ok(Map.of(
-        "success", false,
-        "message", "Bạn chưa đăng ký!"
-      ));
+      return ResponseEntity.ok(
+        response
+          .with("success", false)
+          .with("message", "Bạn chưa đăng ký!")
+      );
     }
 
     Season season = seasonService.getOrCreate();
     List<Matchup> thisWeekMatches = premierLeagueService.getMatches(season);
     if (thisWeekMatches.isEmpty()) {
-      return ResponseEntity.ok(Map.of(
-        "success", false,
-        "message", "Tuần này chưa có trận đấu"
-      ));
+      return ResponseEntity.ok(
+        response
+          .with("success", false)
+          .with("message", "Tuần này chưa có trận đấu")
+      );
     }
 
     StringBuilder builder = new StringBuilder();
@@ -61,10 +64,11 @@ public class PremierLeagueController {
         match.getHomeStadium()
       ));
     }
-    return ResponseEntity.ok(Map.of(
-      "success", true,
-      "message", String.format("Tuần này có %s trận đấu", thisWeekMatches.size()),
-      "data", builder.toString()
-    ));
+    return ResponseEntity.ok(
+      response
+        .with("success", true)
+        .with("message", String.format("Tuần này có %s trận đấu", thisWeekMatches.size()))
+        .with("data", builder.toString())
+    );
   }
 }

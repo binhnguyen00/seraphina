@@ -1,5 +1,6 @@
 package me.binhnguyen.seraphina;
 
+import me.binhnguyen.seraphina.common.DataRecord;
 import me.binhnguyen.seraphina.entity.Matchup;
 import me.binhnguyen.seraphina.entity.Season;
 import me.binhnguyen.seraphina.service.CrawlerService;
@@ -13,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @SpringBootTest
 class ServicesTests {
@@ -36,7 +36,7 @@ class ServicesTests {
 
   @Test
   void pullEmptyMatchesTest() {
-    List<Map<String, Object>> matches = crawlerService.pullMatchesByDate(
+    List<DataRecord> matches = crawlerService.pullMatchesByDate(
       thisSeason,
       LocalDate.parse("2025-09-06"),
       LocalDate.parse("2025-09-07")
@@ -46,7 +46,7 @@ class ServicesTests {
 
   @Test
   void pullMatchesTest() {
-    List<Map<String, Object>> matches = crawlerService.pullMatchesByDate(
+    List<DataRecord> matches = crawlerService.pullMatchesByDate(
       thisSeason,
       LocalDate.parse("2025-09-13"),
       LocalDate.parse("2025-09-14")
