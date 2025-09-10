@@ -15,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-@Profile("!prod")
+@Profile("dev")
 @RequiredArgsConstructor
 public class MatchupInit {
   private final SeasonService seasonService;

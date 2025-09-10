@@ -3,7 +3,6 @@ package me.binhnguyen.seraphina.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.binhnguyen.seraphina.common.DataRecord;
 import me.binhnguyen.seraphina.entity.Matchup;
 import me.binhnguyen.seraphina.entity.Season;
 import me.binhnguyen.seraphina.repository.MatchupRepo;
@@ -13,10 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -28,7 +24,7 @@ public class PremierLeagueService {
   /** save this week matches */
   @Transactional
   public List<Matchup> createOrUpdateMatches(Season season) {
-    List<DataRecord> matches = crawlerService.pullMatches(season);
+    List<Map<String, Object>> matches = crawlerService.pullMatches(season);
     if (matches.isEmpty())
       return Collections.emptyList();
 
@@ -59,7 +55,7 @@ public class PremierLeagueService {
   /** save this matches by date range */
   @Transactional
   public List<Matchup> createOrUpdateMatches(Season season, LocalDate from, LocalDate to) {
-    List<DataRecord> matches = crawlerService.pullMatchesByDate(season, from, to);
+    List<Map<String, Object>> matches = crawlerService.pullMatchesByDate(season, from, to);
     if (matches.isEmpty())
       return Collections.emptyList();
 
@@ -90,12 +86,12 @@ public class PremierLeagueService {
   }
 
   @SuppressWarnings("unchecked")
-  private List<Matchup> toMatchups(List<DataRecord> matches) {
+  private List<Matchup> toMatchups(List<Map<String, Object>> matches) {
     List<Matchup> matchups = new ArrayList<>();
-    for (DataRecord match : matches) {
+    for (Map<String, Object> match : matches) {
       Matchup matchup = new Matchup();
-      List<DataRecord> competitors = (List<DataRecord>) match.get("competitors");
-      for (DataRecord competitor : competitors) {
+      List<Map<String, Object>> competitors = (List<Map<String, Object>>) match.get("competitors");
+      for (Map<String, Object> competitor : competitors) {
         String teamName = competitor.getOrDefault("teamName", "").toString();
         String homeAway = competitor.getOrDefault("homeAway", "").toString();
         boolean isHome = homeAway.equals("home");
