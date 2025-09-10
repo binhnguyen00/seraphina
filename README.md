@@ -5,15 +5,37 @@
 - Sent notification to user via Zalo
 
 ## Tech Stack
-- Spring Boot
+- Java 21 with Spring Boot
+- Gradle
+- PostgreSQL 16
 - Flask
-- Webhook
 - Zalo Bot
+- Docker
 
-## Docker
+## Requirements
+- Docker & Docker Compose
+- Java 21 (for local development)
+- Python 3.12 (for local development)
+- PostgreSQL 16 (for local development)
+- Ngrok account (for webhook)
+
+## Environment Setup
 ```bash
-docker compose up --build
+  cp .env.example .env
 ```
+Update the following variables in ```.env```:
+  - MICROSERVICE_ZALO_BOT_TOKEN (Contact me)
+  - NGROK_AUTHTOKEN (get from ngrok.com)
+
+## Database Setup
+```bash
+  ./scripts/database.sh initial-user
+  ./scripts/database.sh initial-db
+```
+
+## Verify Services
+Main Application: http://localhost:8080/health
+Zalo Bot: http://localhost:8081/health
 
 ## Author - Binh Nguyen
 - **[Github](https://github.com/binhnguyen00)**
