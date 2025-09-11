@@ -3,7 +3,6 @@ package me.binhnguyen.seraphina.controller;
 import lombok.RequiredArgsConstructor;
 import me.binhnguyen.seraphina.common.DataRecord;
 import me.binhnguyen.seraphina.entity.Matchup;
-import me.binhnguyen.seraphina.entity.Season;
 import me.binhnguyen.seraphina.entity.ZaloChat;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
 import me.binhnguyen.seraphina.service.SeasonService;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,9 +36,7 @@ public class PremierLeagueController extends BaseController {
       );
     }
 
-    int year = LocalDate.now().getYear();
-    Season season = seasonService.getSeason(year);
-    List<Matchup> thisWeekMatches = premierLeagueService.getCurrentWeekMatches(season);
+    List<Matchup> thisWeekMatches = premierLeagueService.getCurrentWeekMatches();
     if (thisWeekMatches.isEmpty()) {
       return ResponseEntity.ok(
         response
@@ -60,8 +56,8 @@ public class PremierLeagueController extends BaseController {
       
       """,
         i + 1,
-        match.getHome(),
-        match.getAway(),
+        match.getHomeTeam().getName(),
+        match.getAwayTeam().getName(),
         match.getFormatMatchDay(),
         match.getHomeStadium()
       ));

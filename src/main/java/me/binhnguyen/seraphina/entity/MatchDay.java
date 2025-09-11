@@ -31,6 +31,6 @@ public class MatchDay extends BaseEntity {
   private League league;
 
   @Getter @Setter
-  @Column(nullable = false)
+  @Column(name = "date", nullable = false)
   private LocalDate date;
 }

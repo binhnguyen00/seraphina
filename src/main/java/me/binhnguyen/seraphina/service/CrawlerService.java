@@ -71,9 +71,10 @@ public class CrawlerService {
         String homeAway = competitor.getOrDefault("homeAway", "").toString();
         Map<String, Object> team = (Map<String, Object>) competitor.getOrDefault("team", new HashMap<>());
         String teamName = team.getOrDefault("name", "").toString();
+        String teamCode = team.getOrDefault("abbreviation", "").toString();
 
         competitorMap.put("homeAway", homeAway);
-        competitorMap.put("teamName", teamName);
+        competitorMap.put("teamCode", teamCode);
         competitorsList.add(competitorMap);
       });
 
@@ -96,7 +97,7 @@ public class CrawlerService {
   public List<Map<String, Object>> pullCurrentWeekMatches(String leagueId) {
     Objects.requireNonNull(leagueId, "League is required");
 
-    List<MatchDay> allMatchDays = matchDayRepo.getMatchDay(leagueId, LocalDate.now().getYear());
+    List<MatchDay> allMatchDays = matchDayRepo.findByLeagueAndYear(leagueId, LocalDate.now().getYear());
     if (allMatchDays.isEmpty()) {
       log.error("League {} in this weekend has no match days", leagueId);
       return Collections.emptyList();
@@ -132,13 +133,13 @@ public class CrawlerService {
     }
 
     List<Map<String, Object>> leagues = (List<Map<String, Object>>) response.getOrDefault("leagues", Collections.emptyList());
-    if (leagues.isEmpty()) log.error("getCurrentSeasonScheduleMatchDays has no leagues");
+    if (leagues.isEmpty()) log.error("getCurrentSeasonScheduleMatchDays API has no leagues");
 
     Map<String, Object> league = leagues.getFirst();
     List<LocalDate> dates = new ArrayList<>();
     List<String> calendar = (List<String>) league.getOrDefault("calendar", Collections.emptyList());
     if (calendar.isEmpty()) {
-      log.error("Has no calendar");
+      log.error("getCurrentSeasonScheduleMatchDays API has no calendar");
       return dates;
     }
     calendar.forEach(date -> {
@@ -146,6 +147,7 @@ public class CrawlerService {
       LocalDate localDate = LocalDate.parse(date);
       dates.add(localDate);
     });
+
     return dates;
   }
 

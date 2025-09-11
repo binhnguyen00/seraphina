@@ -33,7 +33,6 @@ public class AutomationService {
   public void updateCurrentSeason() {
     List<LocalDate> matchDays = crawlerService.pullCurrentSeasonScheduleMatchDays(PremierLeagueService.LEAGUE_ID);
     Season record = seasonService.getCurrentSeason();
-    record.setMatchDays(matchDays);
     seasonService.save(record);
   }
 
@@ -51,7 +50,7 @@ public class AutomationService {
   public void createOrUpdateMatches() {
     List<MatchDay> matchDays = premierLeagueService.getThisWeekMatchDays();
     if (matchDays.isEmpty()) return;
-    premierLeagueService.createOrUpdateMatches(
+    premierLeagueService.createOrUpdateMatchups(
       matchDays.getFirst().getDate(),
       matchDays.getLast().getDate()
     );
@@ -63,8 +62,7 @@ public class AutomationService {
   @Transactional
   @Scheduled(cron = "0 0 9 ? * FRI,SAT,SUN")
   public void notifyZalo() {
-    Season season = seasonService.getCurrentSeason();
-    List<Matchup> thisWeekMatches = premierLeagueService.getCurrentWeekMatches(season);
+    List<Matchup> thisWeekMatches = premierLeagueService.getCurrentWeekMatches();
     StringBuilder builder = new StringBuilder();
     for (int i = 0; i < thisWeekMatches.size(); i++) {
       Matchup match = thisWeekMatches.get(i);
@@ -77,8 +75,8 @@ public class AutomationService {
       
       """,
         i + 1,
-        match.getHome(),
-        match.getAway(),
+        match.getHomeTeam().getName(),
+        match.getAwayTeam().getName(),
         match.getFormatMatchDay(),
         match.getHomeStadium()
       ));

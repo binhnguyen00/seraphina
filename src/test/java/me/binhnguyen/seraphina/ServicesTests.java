@@ -1,10 +1,11 @@
 package me.binhnguyen.seraphina;
 
-import me.binhnguyen.seraphina.entity.Matchup;
+import me.binhnguyen.seraphina.entity.*;
 import me.binhnguyen.seraphina.service.CrawlerService;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
 import me.binhnguyen.seraphina.service.SeasonService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +16,6 @@ import java.util.Map;
 
 @SpringBootTest
 class ServicesTests {
-
   @Autowired
   private CrawlerService crawlerService;
 
@@ -24,6 +24,40 @@ class ServicesTests {
 
   @Autowired
   private PremierLeagueService premierLeagueService;
+
+  @BeforeEach
+  void setup() {
+    initSeason();
+    initLeague();
+    initTeams();
+  }
+
+  private void initSeason() {
+    try {
+      Season season = seasonService.createSeason();
+      System.out.printf("Season %s created\n", season.getYear());
+    } catch (Exception e) {
+      System.out.printf("Failed to initialize seasons %s\n", e);
+    }
+  }
+
+  private void initLeague() {
+    try {
+      League premierLeague = premierLeagueService.create();
+      System.out.printf("%s created\n", premierLeague.getName());
+    } catch (Exception e) {
+      System.out.printf("Failed to initialize leagues \n%s", e);
+    }
+  }
+
+  private void initTeams() {
+    try {
+      List<Team> teams = premierLeagueService.createOrUpdateTeams();
+      System.out.printf("Premier League Teams created. %s teams%n", teams.size());
+    } catch (Exception e) {
+      System.out.printf("Failed to initialize teams %s\n", e);
+    }
+  }
 
   @Test
   void pullEmptyMatchesTest() {
@@ -46,8 +80,8 @@ class ServicesTests {
   }
 
   @Test
-  void createOrUpdateMatchesTest() {
-    List<Matchup> matchups = premierLeagueService.createOrUpdateMatches(
+  void allLeagueCreateOrUpdateMatchesTest() {
+    List<Matchup> matchups = premierLeagueService.createOrUpdateMatchups(
       LocalDate.parse("2025-09-13"),
       LocalDate.parse("2025-09-14")
     );
@@ -56,5 +90,21 @@ class ServicesTests {
       System.out.println(matchup.getCode());
       System.out.println(matchup.getMatchDay().toString());
     });
+  }
+
+  @Test
+  void getAllMatchDayTest() {
+    List<MatchDay> matchDays = premierLeagueService.getAllMatchDays();
+    Assertions.assertFalse(matchDays.isEmpty());
+    matchDays.forEach(matchDay -> {
+      System.out.println(matchDay.getDate());
+    });
+  }
+
+  @Test
+  void createOrUpdateAllMatchDaysTest() {
+    List<MatchDay> matchDays = premierLeagueService.createOrUpdateAllMatchDays();
+    Assertions.assertFalse(matchDays.isEmpty());
+    matchDays.forEach(matchDay -> System.out.println(matchDay.getDate()));
   }
 }

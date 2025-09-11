@@ -22,17 +22,24 @@ public class Matchup extends BaseEntity {
   private String code;
 
   @Getter @Setter
-  @Column(nullable = false)
-  private String home;
+  @ManyToOne
+  @JoinColumn(name = "home_id", nullable = false)
+  private Team homeTeam;
 
   @Getter @Setter
-  @Column(nullable = false)
-  private String away;
+  @ManyToOne
+  @JoinColumn(name = "away_id", nullable = false)
+  private Team awayTeam;
 
   @Getter @Setter
   @ManyToOne
   @JoinColumn(name = "season_id", nullable = false)
   private Season season;
+
+  @Getter @Setter
+  @ManyToOne
+  @JoinColumn(name = "league_id", nullable = false)
+  private League league;
 
   @Getter @Setter
   @Column(name = "home_stadium")
@@ -65,8 +72,8 @@ public class Matchup extends BaseEntity {
     if (Objects.isNull(this.code) || this.code.isEmpty() || this.code.isBlank()) {
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
       String matchDayStr = matchDay.format(formatter);
-      String homeSlug = slugify(home);
-      String awaySlug = slugify(away);
+      String homeSlug = slugify(homeTeam.getName());
+      String awaySlug = slugify(awayTeam.getName());
       this.code = String.format("%s-%s-%s", homeSlug, awaySlug, matchDayStr);
     }
   }
