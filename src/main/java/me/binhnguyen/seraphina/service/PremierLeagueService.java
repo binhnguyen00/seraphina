@@ -22,7 +22,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class PremierLeagueService {
-  public static final String LEAGUE_ID = "eng.1";
+  public static final String LEAGUE_CODE = "eng.1";
 
   private final TeamRepo teamRepo;
   private final LeagueRepo leagueRepo;
@@ -32,26 +32,27 @@ public class PremierLeagueService {
   private final SeasonService seasonService;
 
   public List<MatchDay> getThisWeekMatchDays() {
-    Season season = seasonService.getCurrentSeason();
-    LocalDate today = LocalDate.now();
-    LocalDate thisSaturday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
-    LocalDate thisSunday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+    final LocalDate today = LocalDate.now();
+    final LocalDate THIS_MONDAY = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
+    final LocalDate THIS_SUNDAY = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
-    List<MatchDay> matchDays = matchDayRepo.findByLeagueAndYear(LEAGUE_ID, Integer.parseInt(season.getYear()));
+    Season season = seasonService.getCurrentSeason();
+    List<MatchDay> matchDays = matchDayRepo.findByLeagueAndYear(LEAGUE_CODE, season.getYear());
     if (matchDays.isEmpty()) {
       log.error("Found no match day in this week");
       return Collections.emptyList();
     }
+
     return matchDays
       .stream()
-      .filter(matchDay -> matchDay.getDate().isAfter(today))
-      .filter(matchDay -> matchDay.getDate().equals(thisSaturday) || matchDay.getDate().equals(thisSunday))
+      .filter(matchDay -> !matchDay.getDate().isBefore(THIS_MONDAY)) // >= Monday
+      .filter(matchDay -> !matchDay.getDate().isAfter(THIS_SUNDAY))  // <= Sunday
       .toList();
   }
 
   public List<MatchDay> getAllMatchDays() {
     Season season = seasonService.getCurrentSeason();
-    List<MatchDay> matchDays = matchDayRepo.findByLeagueAndYear(LEAGUE_ID, Integer.parseInt(season.getYear()));
+    List<MatchDay> matchDays = matchDayRepo.findByLeagueAndYear(LEAGUE_CODE, season.getYear());
     if (matchDays.isEmpty()) {
       log.error("Found no match day");
       return Collections.emptyList();
@@ -62,7 +63,7 @@ public class PremierLeagueService {
   /** create/update this season match days */
   public List<MatchDay> createOrUpdateAllMatchDays() {
     List<MatchDay> matchDays = this.getAllMatchDays();
-    List<LocalDate> schedules = crawlerService.pullCurrentSeasonScheduleMatchDays(LEAGUE_ID);
+    List<LocalDate> schedules = crawlerService.pullCurrentSeasonScheduleMatchDays(LEAGUE_CODE);
     League league = this.get();
     Season season = seasonService.getCurrentSeason();
     List<MatchDay> holder = new ArrayList<>();
@@ -79,8 +80,8 @@ public class PremierLeagueService {
           .orElse(null);
         if (Objects.isNull(matchDay)) {
           matchDay = new MatchDay(season, league, schedule);
-          holder.add(matchDay);
         }
+        holder.add(matchDay);
       }
     }
 
@@ -101,7 +102,7 @@ public class PremierLeagueService {
     return savedMatchups;
   }
 
-  /** Create/Update matches from target league */
+  /** Create/Update matches from target league. */
   @Transactional
   public List<Matchup> createOrUpdateMatchups(League league, LocalDate from, LocalDate to) {
     Season season = seasonService.getCurrentSeason();
@@ -177,7 +178,7 @@ public class PremierLeagueService {
     List<MatchDay> thisWeekMatchDays = matchDayRepo.findByDateRange(from, to);
     for (MatchDay matchDay : thisWeekMatchDays) {
       OffsetDateTime date = matchDay.getDate().atStartOfDay(ZoneOffset.UTC).toOffsetDateTime();
-      List<Matchup> matchups = matchupRepo.getByMatchDay(date, LEAGUE_ID);
+      List<Matchup> matchups = matchupRepo.getByMatchDay(date, LEAGUE_CODE);
       if (matchups.isEmpty()) {
         log.info("No matches found on this date {}", date);
         continue;
@@ -189,7 +190,7 @@ public class PremierLeagueService {
   }
 
   public League get() {
-    League premierLeague = leagueRepo.getByCode(LEAGUE_ID);
+    League premierLeague = leagueRepo.getByCode(LEAGUE_CODE);
     if (Objects.isNull(premierLeague)) {
       log.warn("Premier League is not found");
       return null;
@@ -199,12 +200,12 @@ public class PremierLeagueService {
 
   @Transactional
   public League create() {
-    League exist = leagueRepo.getByCode(LEAGUE_ID);
+    League exist = leagueRepo.getByCode(LEAGUE_CODE);
     if (Objects.nonNull(exist)) {
       log.warn("League: {} is already exist", exist.getName());
       return exist;
     } else {
-      League premierLeague = leagueRepo.save(new League(LEAGUE_ID, "Premier League"));
+      League premierLeague = leagueRepo.save(new League(LEAGUE_CODE, "Premier League"));
       log.info("League: {} created", premierLeague.getName());
       return premierLeague;
     }
@@ -212,14 +213,14 @@ public class PremierLeagueService {
 
   @Transactional
   public List<Team> createOrUpdateTeams() {
-    List<Team> teams = crawlerService.pullTeams(LEAGUE_ID);
+    List<Team> teams = crawlerService.pullTeams(LEAGUE_CODE);
     if (teams.isEmpty())
       return Collections.emptyList();
 
     List<Team> toCreates = new ArrayList<>();
     List<Team> toUpdates = new ArrayList<>();
 
-    League premierLeague = leagueRepo.getByCode(LEAGUE_ID);
+    League premierLeague = leagueRepo.getByCode(LEAGUE_CODE);
     teams.forEach(team -> {
       Team exist = teamRepo.getByCode(team.getCode());
       if (Objects.isNull(exist)) {

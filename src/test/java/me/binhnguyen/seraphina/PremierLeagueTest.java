@@ -1,5 +1,6 @@
 package me.binhnguyen.seraphina;
 
+import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.*;
 import me.binhnguyen.seraphina.service.CrawlerService;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
@@ -14,57 +15,74 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @SpringBootTest
-class ServicesTests {
-  @Autowired
-  private CrawlerService crawlerService;
+class PremierLeagueTest {
+  private final CrawlerService crawlerService;
+  private final SeasonService seasonService;
+  private final PremierLeagueService premierLeagueService;
 
   @Autowired
-  private SeasonService seasonService;
-
-  @Autowired
-  private PremierLeagueService premierLeagueService;
+  PremierLeagueTest(
+    CrawlerService crawlerService,
+    SeasonService seasonService,
+    PremierLeagueService premierLeagueService
+  ) {
+    this.crawlerService = crawlerService;
+    this.seasonService = seasonService;
+    this.premierLeagueService = premierLeagueService;
+  }
 
   @BeforeEach
   void setup() {
     initSeason();
     initLeague();
     initTeams();
+    initMatchDays();
   }
 
   private void initSeason() {
     try {
       Season season = seasonService.createSeason();
-      System.out.printf("Season %s created\n", season.getYear());
+      log.info("Season {} created", season.getYear());
     } catch (Exception e) {
-      System.out.printf("Failed to initialize seasons %s\n", e);
+      log.error("Failed to initialize seasons", e);
     }
   }
 
   private void initLeague() {
     try {
       League premierLeague = premierLeagueService.create();
-      System.out.printf("%s created\n", premierLeague.getName());
+      log.info("{} created", premierLeague.getName());
     } catch (Exception e) {
-      System.out.printf("Failed to initialize leagues \n%s", e);
+      log.error("Failed to initialize leagues", e);
     }
   }
 
   private void initTeams() {
     try {
       List<Team> teams = premierLeagueService.createOrUpdateTeams();
-      System.out.printf("Premier League Teams created. %s teams%n", teams.size());
+      log.info("Premier League Teams created. {} teams", teams.size());
     } catch (Exception e) {
-      System.out.printf("Failed to initialize teams %s\n", e);
+      log.error("Failed to initialize teams", e);
+    }
+  }
+
+  private void initMatchDays() {
+    try {
+      List<MatchDay> matchDays = premierLeagueService.createOrUpdateAllMatchDays();
+      log.info("Premier League MatchDays created. {} match days", matchDays.size());
+    } catch (Exception e) {
+      log.error("Failed to initialize match days", e);
     }
   }
 
   @Test
   void pullEmptyMatchesTest() {
     List<Map<String, Object>> matches = crawlerService.pullMatchesByDateRange(
-      PremierLeagueService.LEAGUE_ID,
-      LocalDate.parse("2025-09-06"),
-      LocalDate.parse("2025-09-07")
+        PremierLeagueService.LEAGUE_CODE,
+        LocalDate.parse("2025-09-06"),
+        LocalDate.parse("2025-09-07")
     );
     Assertions.assertTrue(matches.isEmpty());
   }
@@ -72,9 +90,9 @@ class ServicesTests {
   @Test
   void pullMatchesTest() {
     List<Map<String, Object>> matches = crawlerService.pullMatchesByDateRange(
-      PremierLeagueService.LEAGUE_ID,
-      LocalDate.parse("2025-09-13"),
-      LocalDate.parse("2025-09-14")
+        PremierLeagueService.LEAGUE_CODE,
+        LocalDate.parse("2025-09-13"),
+        LocalDate.parse("2025-09-14")
     );
     Assertions.assertFalse(matches.isEmpty());
   }
@@ -82,13 +100,13 @@ class ServicesTests {
   @Test
   void allLeagueCreateOrUpdateMatchesTest() {
     List<Matchup> matchups = premierLeagueService.createOrUpdateMatchups(
-      LocalDate.parse("2025-09-13"),
-      LocalDate.parse("2025-09-14")
+        LocalDate.parse("2025-09-13"),
+        LocalDate.parse("2025-09-14")
     );
     Assertions.assertFalse(matchups.isEmpty());
     matchups.forEach(matchup -> {
-      System.out.println(matchup.getCode());
-      System.out.println(matchup.getMatchDay().toString());
+      log.info("Matchup code: {}", matchup.getCode());
+      log.info("Match Day: {}", matchup.getMatchDay());
     });
   }
 
@@ -96,15 +114,20 @@ class ServicesTests {
   void getAllMatchDayTest() {
     List<MatchDay> matchDays = premierLeagueService.getAllMatchDays();
     Assertions.assertFalse(matchDays.isEmpty());
-    matchDays.forEach(matchDay -> {
-      System.out.println(matchDay.getDate());
-    });
+    log.info("ALl MatchDays: {}", matchDays.size());
   }
 
   @Test
   void createOrUpdateAllMatchDaysTest() {
     List<MatchDay> matchDays = premierLeagueService.createOrUpdateAllMatchDays();
+    log.info("All MatchDays: {}", matchDays.size());
     Assertions.assertFalse(matchDays.isEmpty());
-    matchDays.forEach(matchDay -> System.out.println(matchDay.getDate()));
+  }
+
+  @Test
+  void getThisWeekMatchDaysTest() {
+    List<MatchDay> matchDays = premierLeagueService.getThisWeekMatchDays();
+    Assertions.assertFalse(matchDays.isEmpty());
+    matchDays.forEach(matchDay -> log.info("Date: {}", matchDay.getDate()));
   }
 }

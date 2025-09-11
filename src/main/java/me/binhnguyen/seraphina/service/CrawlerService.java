@@ -94,12 +94,12 @@ public class CrawlerService {
   }
 
   /** pull this week matches from target league */
-  public List<Map<String, Object>> pullCurrentWeekMatches(String leagueId) {
-    Objects.requireNonNull(leagueId, "League is required");
+  public List<Map<String, Object>> pullCurrentWeekMatches(String leagueCode) {
+    Objects.requireNonNull(leagueCode, "League is required");
 
-    List<MatchDay> allMatchDays = matchDayRepo.findByLeagueAndYear(leagueId, LocalDate.now().getYear());
+    List<MatchDay> allMatchDays = matchDayRepo.findByLeagueAndYear(leagueCode, String.valueOf(LocalDate.now().getYear()));
     if (allMatchDays.isEmpty()) {
-      log.error("League {} in this weekend has no match days", leagueId);
+      log.error("League {} in this weekend has no match days", leagueCode);
       return Collections.emptyList();
     }
 
@@ -112,7 +112,7 @@ public class CrawlerService {
       .toList();
 
     return this.pullMatchesByDateRange(
-      leagueId,
+      leagueCode,
       thisWeekMatchDays.getFirst().getDate(),
       thisWeekMatchDays.getLast().getDate()
     );
