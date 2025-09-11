@@ -41,7 +41,7 @@ public class AutomationService {
    */
   @Transactional
   @Scheduled(cron = "0 0 7 * * MON")
-  public void refreshMatchDay() {
+  public void refreshMatchDays() {
     premierLeagueService.createOrUpdateAllMatchDays();
   }
 

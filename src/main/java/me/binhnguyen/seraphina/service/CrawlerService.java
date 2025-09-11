@@ -1,7 +1,6 @@
 package me.binhnguyen.seraphina.service;
 
 import lombok.extern.slf4j.Slf4j;
-import me.binhnguyen.seraphina.entity.MatchDay;
 import me.binhnguyen.seraphina.entity.Team;
 import me.binhnguyen.seraphina.repository.MatchDayRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +8,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @Slf4j
@@ -31,14 +28,14 @@ public class CrawlerService {
   }
 
   @SuppressWarnings("unchecked")
-  public List<Map<String, Object>> pullMatchesByDateRange(String leagueId, LocalDate from, LocalDate to) {
+  public List<Map<String, Object>> pullMatchesByDateRange(String leagueCode, LocalDate from, LocalDate to) {
     String dates = String.format("%s-%s", from.toString().replace("-", ""), to.toString().replace("-", ""));
 
     Map<String, Object> response = webClient.get()
       .uri(uriBuilder -> uriBuilder
-        .path("/{leagueId}/scoreboard")
+        .path("/{leagueCode}/scoreboard")
         .queryParam("dates", dates)
-        .build(leagueId))
+        .build(leagueCode))
       .retrieve()
       .bodyToMono(Map.class)
       .timeout(Duration.ofSeconds(20))
@@ -70,7 +67,6 @@ public class CrawlerService {
         Map<String, Object> competitorMap = new HashMap<>();
         String homeAway = competitor.getOrDefault("homeAway", "").toString();
         Map<String, Object> team = (Map<String, Object>) competitor.getOrDefault("team", new HashMap<>());
-        String teamName = team.getOrDefault("name", "").toString();
         String teamCode = team.getOrDefault("abbreviation", "").toString();
 
         competitorMap.put("homeAway", homeAway);
@@ -93,35 +89,10 @@ public class CrawlerService {
     return matchesHolder;
   }
 
-  /** pull this week matches from target league */
-  public List<Map<String, Object>> pullCurrentWeekMatches(String leagueCode) {
-    Objects.requireNonNull(leagueCode, "League is required");
-
-    List<MatchDay> allMatchDays = matchDayRepo.findByLeagueAndYear(leagueCode, String.valueOf(LocalDate.now().getYear()));
-    if (allMatchDays.isEmpty()) {
-      log.error("League {} in this weekend has no match days", leagueCode);
-      return Collections.emptyList();
-    }
-
-    LocalDate today = LocalDate.now();
-    LocalDate thisSaturday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
-    LocalDate thisSunday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
-    List<MatchDay> thisWeekMatchDays = allMatchDays.stream()
-      .filter(matchDay -> matchDay.getDate().isAfter(today))
-      .filter(matchDay -> matchDay.getDate().equals(thisSaturday) || matchDay.getDate().equals(thisSunday))
-      .toList();
-
-    return this.pullMatchesByDateRange(
-      leagueCode,
-      thisWeekMatchDays.getFirst().getDate(),
-      thisWeekMatchDays.getLast().getDate()
-    );
-  }
-
   @SuppressWarnings("unchecked")
-  public List<LocalDate> pullCurrentSeasonScheduleMatchDays(String leagueId) {
+  public List<LocalDate> pullCurrentSeasonScheduleMatchDays(String leagueCode) {
     Map<String, Object> response = this.webClient.get()
-      .uri("/{leagueId}/scoreboard", leagueId)
+      .uri("/{leagueId}/scoreboard", leagueCode)
       .retrieve()
       .bodyToMono(Map.class)
       .timeout(Duration.ofSeconds(10))
@@ -152,9 +123,9 @@ public class CrawlerService {
   }
 
   @SuppressWarnings("unchecked")
-  public List<Team> pullTeams(String leagueId) {
+  public List<Team> pullTeams(String leagueCode) {
     Map<String, Object> response = this.webClient.get()
-      .uri("/{leagueId}/teams", leagueId)
+      .uri("/{leagueId}/teams", leagueCode)
       .retrieve()
       .bodyToMono(Map.class)
       .timeout(Duration.ofSeconds(10))

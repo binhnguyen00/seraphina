@@ -33,7 +33,7 @@ public class PremierLeagueService {
 
   public List<MatchDay> getThisWeekMatchDays() {
     final LocalDate today = LocalDate.now();
-    final LocalDate THIS_MONDAY = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
+    final LocalDate THIS_MONDAY = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     final LocalDate THIS_SUNDAY = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
     Season season = seasonService.getCurrentSeason();
