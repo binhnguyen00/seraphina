@@ -1,4 +1,4 @@
-<h1 align="center"> Premier League Reminder </h1>
+<h1 align="center"> ⚽️ Premier League Reminder </h1>
 
 ## Description
 - Pull Premier League schedule matches from ESPN
