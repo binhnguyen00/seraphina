@@ -14,11 +14,25 @@ spring:
     url: jdbc:postgresql://${spring.datasource.server.host}:${spring.datasource.server.port}/seraphinadb
     username: seraphina
     password: seraphina@123
+
   jpa:
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
   ansi:
     enabled: DETECT
+
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+    properties:
+      org:
+        quartz:
+          jobStore:
+            misfireThreshold: 60000
+          scheduler:
+            instanceId: AUTO

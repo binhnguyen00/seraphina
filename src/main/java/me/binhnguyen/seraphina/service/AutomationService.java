@@ -5,9 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.Matchup;
 import me.binhnguyen.seraphina.entity.ZaloChat;
-import me.binhnguyen.seraphina.repository.MatchupRepo;
+import me.binhnguyen.seraphina.utils.MessageTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -15,13 +14,9 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class AutomationService {
-  private final MatchupRepo matchupRepo;
   private final ZaloChatService zaloService;
-  private final SeasonService seasonService;
-  private final CrawlerService crawlerService;
   private final PremierLeagueService premierLeagueService;
 
   /* Cron Example
@@ -60,32 +55,14 @@ public class AutomationService {
   }
 
   /**
-   * runs at 07:00 on every Friday, Saturday, and Sunday. every month
+   * Notify Zalo subscribers about upcoming matches
+   * Run daily at 00:00
    */
-  @Deprecated
-  @Transactional
-  @Scheduled(cron = "0 0 9 ? * FRI,SAT,SUN")
+  @Scheduled(cron = "0 0 0 * * *")
   public void notifyZalo() {
     List<Matchup> thisWeekMatches = premierLeagueService.getCurrentWeekMatches();
-    StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < thisWeekMatches.size(); i++) {
-      Matchup match = thisWeekMatches.get(i);
-      builder.append(String.format("""
-      %d ------------------------------------
-      Đội nhà\t%s
-      Đội khách\t%s
-      Giờ đá\t%s
-      Địa điểm\t%s
-      
-      """,
-        i + 1,
-        match.getHomeTeam().getName(),
-        match.getAwayTeam().getName(),
-        match.getFormatMatchDay(),
-        match.getHomeStadium()
-      ));
-    }
+    String message = MessageTemplate.ZALO(thisWeekMatches);
     List<ZaloChat> subscribers = zaloService.getAllSubscribers();
-    zaloService.sendMessageTo(subscribers, builder.toString());
+    zaloService.sendMessageTo(subscribers, message);
   }
 }
