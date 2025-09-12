@@ -20,7 +20,7 @@ public class CrawlerService {
 
   @Autowired
   public CrawlerService(
-    @Qualifier("premierLeague") WebClient webClient,
+    @Qualifier("espnWebClient") WebClient webClient,
     MatchDayRepo matchDayRepo
   ) {
     this.webClient = webClient;

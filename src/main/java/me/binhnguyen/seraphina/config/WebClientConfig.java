@@ -9,8 +9,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfig {
 
   @Bean
-  @Qualifier("premierLeague")
-  public WebClient premierLeagueWebClient() {
+  @Qualifier("espnWebClient")
+  public WebClient espnWebClient() {
     return WebClient.builder()
       .baseUrl("https://site.api.espn.com/apis/site/v2/sports/soccer")
       .defaultHeader("Content-Type", "application/json; charset=utf-8")

@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
+@Deprecated
 @Slf4j
 @RequiredArgsConstructor
 public class AutomationService {
