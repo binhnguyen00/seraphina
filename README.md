@@ -34,8 +34,8 @@ Update the following variables in ```.env```:
 ```
 
 ## Verify Services
-Main Application: http://localhost:8080/health
-Zalo Bot: http://localhost:8081/health
+- Main Application: http://localhost:8080/health
+- Zalo Bot: http://localhost:8081/health
 
 ## Author - Binh Nguyen
 - **[Github](https://github.com/binhnguyen00)**
