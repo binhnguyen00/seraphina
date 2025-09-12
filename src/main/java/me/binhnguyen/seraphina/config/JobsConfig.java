@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class QuartzConfig {
+public class JobsConfig {
 
   /**
    * Auto update match days. Match days are pre-saved on server init.
@@ -50,7 +50,7 @@ public class QuartzConfig {
     return TriggerBuilder.newTrigger()
       .forJob(createOrUpdateCurrentWeekMatchupsJob())
       .withIdentity("createOrUpdateCurrentWeekMatchupsTrigger")
-      .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 ? * MON"))
+      .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 * * ?"))
       .build();
   }
 
@@ -71,7 +71,7 @@ public class QuartzConfig {
     return TriggerBuilder.newTrigger()
       .forJob(notifyZaloJob())
       .withIdentity("notifyZaloTrigger")
-      .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 ? * MON"))
+      .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * ?"))
       .build();
   }
 }
