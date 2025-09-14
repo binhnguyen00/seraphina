@@ -28,22 +28,6 @@ public abstract class LeagueService {
 
   protected abstract String getCode();
 
-  public League getPremierLeague() {
-    try {
-      return leagueRepo.getByCode("eng.1");
-    } catch (Exception e) {
-      throw new RuntimeException("Premier League is not initialized", e);
-    }
-  }
-
-  public League getLaliga() {
-    try {
-      return leagueRepo.getByCode("esp.1");
-    } catch (Exception e) {
-      throw new RuntimeException("Laliga is not initialized", e);
-    }
-  }
-
   public List<MatchDay> getThisWeekMatchDays() {
     final LocalDate today = LocalDate.now();
     final LocalDate THIS_MONDAY = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
