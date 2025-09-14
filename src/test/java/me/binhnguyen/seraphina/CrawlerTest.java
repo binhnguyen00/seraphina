@@ -63,7 +63,7 @@ public class CrawlerTest {
     LocalDate monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     LocalDate sunday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
-    List<Map<String, Object>> matches = crawlerService.pullMatchesByDateRange(PremierLeagueService.LEAGUE_CODE, monday, sunday);
+    List<Map<String, Object>> matches = crawlerService.pullMatchesByDateRange(premierLeagueService.getCode(), monday, sunday);
     log.info("Found {} matches in {} - {}", matches.size(), monday, sunday);
     Assertions.assertFalse(matches.isEmpty());
   }
@@ -74,7 +74,7 @@ public class CrawlerTest {
 
     List<MatchDay> matchDays = premierLeagueService.getThisWeekMatchDays();
     List<Map<String, Object>> matches = crawlerService.pullMatchesByDateRange(
-      PremierLeagueService.LEAGUE_CODE,
+      premierLeagueService.getCode(),
       matchDays.getFirst().getDate(),
       matchDays.getLast().getDate()
     );
@@ -84,14 +84,14 @@ public class CrawlerTest {
 
   @Test
   void pullTeamTest() {
-    List<Team> teams = crawlerService.pullTeams(PremierLeagueService.LEAGUE_CODE);
+    List<Team> teams = crawlerService.pullTeams(premierLeagueService.getCode());
     log.info("Found {} teams", teams.size());
     Assertions.assertFalse(teams.isEmpty());
   }
 
   @Test
   void pullCurrentSeasonScheduleMatchDaysTest() {
-    List<LocalDate> matchDays = crawlerService.pullCurrentSeasonScheduleMatchDays(PremierLeagueService.LEAGUE_CODE);
+    List<LocalDate> matchDays = crawlerService.pullCurrentSeasonScheduleMatchDays(premierLeagueService.getCode());
     log.info("Found {} match days", matchDays.size());
     Assertions.assertFalse(matchDays.isEmpty());
   }
