@@ -28,6 +28,9 @@ public abstract class LeagueService {
 
   protected abstract String getCode();
 
+  @Transactional
+  public abstract League create();
+
   public List<MatchDay> getThisWeekMatchDays() {
     final LocalDate today = LocalDate.now();
     final LocalDate THIS_MONDAY = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
@@ -190,20 +193,6 @@ public abstract class LeagueService {
     }
 
     return matches;
-  }
-
-  @Transactional
-  public League create() {
-    final String LEAGUE_CODE = this.getCode();
-    League exist = leagueRepo.getByCode(LEAGUE_CODE);
-    if (Objects.nonNull(exist)) {
-      log.warn("League: {} is already exist", exist.getName());
-      return exist;
-    } else {
-      League premierLeague = leagueRepo.save(new League(LEAGUE_CODE, "Premier League"));
-      log.info("League: {} created", premierLeague.getName());
-      return premierLeague;
-    }
   }
 
   @Transactional
