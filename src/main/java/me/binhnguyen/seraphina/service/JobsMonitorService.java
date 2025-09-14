@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -23,14 +24,17 @@ public class JobsMonitorService {
       for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(group))) {
         List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
         for (Trigger trigger : triggers) {
-          DataRecord info = new DataRecord();
-          info.put("jobName", jobKey.getName());
-          info.put("group", jobKey.getGroup());
-          info.put("triggerName", trigger.getKey().getName());
-          info.put("triggerGroup", trigger.getKey().getGroup());
-          info.put("nextFireTime", trigger.getNextFireTime());
-          info.put("previousFireTime", trigger.getPreviousFireTime());
-          info.put("state", scheduler.getTriggerState(trigger.getKey()).name());
+          DataRecord info = new DataRecord(
+            Map.of(
+              "jobName", jobKey.getName(),
+              "group", jobKey.getGroup(),
+              "triggerName", trigger.getKey().getName(),
+              "triggerGroup", trigger.getKey().getGroup(),
+              "nextFireTime", trigger.getNextFireTime(),
+              "previousFireTime", trigger.getPreviousFireTime(),
+              "state", scheduler.getTriggerState(trigger.getKey()).name()
+            )
+          );
           jobs.add(info);
         }
       }

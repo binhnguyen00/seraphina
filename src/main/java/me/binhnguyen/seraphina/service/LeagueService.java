@@ -31,6 +31,11 @@ public abstract class LeagueService {
   @Transactional
   public abstract League create();
 
+  public League get() {
+    final String LEAGUE_CODE = this.getCode();
+    return leagueRepo.getByCode(LEAGUE_CODE);
+  }
+
   public List<MatchDay> getThisWeekMatchDays() {
     final LocalDate today = LocalDate.now();
     final LocalDate THIS_MONDAY = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));

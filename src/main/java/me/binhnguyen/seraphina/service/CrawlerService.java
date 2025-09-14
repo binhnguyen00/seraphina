@@ -2,7 +2,6 @@ package me.binhnguyen.seraphina.service;
 
 import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.Team;
-import me.binhnguyen.seraphina.repository.MatchDayRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -16,15 +15,10 @@ import java.util.*;
 @Service
 public class CrawlerService {
   private final WebClient webClient;
-  private final MatchDayRepo matchDayRepo;
 
   @Autowired
-  public CrawlerService(
-    @Qualifier("espnWebClient") WebClient webClient,
-    MatchDayRepo matchDayRepo
-  ) {
+  public CrawlerService(@Qualifier("espnWebClient") WebClient webClient) {
     this.webClient = webClient;
-    this.matchDayRepo = matchDayRepo;
   }
 
   @SuppressWarnings("unchecked")
