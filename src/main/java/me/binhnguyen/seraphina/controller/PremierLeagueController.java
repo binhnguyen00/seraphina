@@ -3,10 +3,10 @@ package me.binhnguyen.seraphina.controller;
 import lombok.RequiredArgsConstructor;
 import me.binhnguyen.seraphina.common.DataRecord;
 import me.binhnguyen.seraphina.entity.Matchup;
-import me.binhnguyen.seraphina.entity.ZaloChat;
+import me.binhnguyen.seraphina.entity.Subscriber;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
 import me.binhnguyen.seraphina.service.SeasonService;
-import me.binhnguyen.seraphina.service.ZaloChatService;
+import me.binhnguyen.seraphina.service.SubscriberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,13 +21,13 @@ import java.util.Objects;
 @RequestMapping("/api/v1/premier-league")
 public class PremierLeagueController extends BaseController {
   private final SeasonService seasonService;
-  private final ZaloChatService zaloChatService;
+  private final SubscriberService subscriberService;
   private final PremierLeagueService premierLeagueService;
 
   @GetMapping("/schedule/matches")
   public ResponseEntity<DataRecord> getScheduleMatches(@RequestParam("chat_id") String chatId) {
     DataRecord response = new DataRecord();
-    ZaloChat exist = zaloChatService.getSubscriber(chatId);
+    Subscriber exist = subscriberService.getSubscriber(chatId);
     if (Objects.isNull(exist)) {
       return ResponseEntity.ok(
         response

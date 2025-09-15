@@ -3,9 +3,9 @@ package me.binhnguyen.seraphina.jobs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.Matchup;
-import me.binhnguyen.seraphina.entity.ZaloChat;
+import me.binhnguyen.seraphina.entity.Subscriber;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
-import me.binhnguyen.seraphina.service.ZaloChatService;
+import me.binhnguyen.seraphina.service.SubscriberService;
 import me.binhnguyen.seraphina.utils.MessageTemplate;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -18,7 +18,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class JobNotifyZalo implements Job {
-  private final ZaloChatService zaloService;
+  private final SubscriberService zaloService;
   private final PremierLeagueService premierLeagueService;
 
   @Override
@@ -26,7 +26,7 @@ public class JobNotifyZalo implements Job {
     try {
       List<Matchup> thisWeekMatches = premierLeagueService.getCurrentWeekMatches();
       String message = MessageTemplate.ZALO(thisWeekMatches);
-      List<ZaloChat> subscribers = zaloService.getAllSubscribers();
+      List<Subscriber> subscribers = zaloService.getAllSubscribers();
       zaloService.sendMessageTo(subscribers, message);
     } catch (Exception e) {
       throw new JobExecutionException(e);

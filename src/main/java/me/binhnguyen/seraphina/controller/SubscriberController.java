@@ -2,8 +2,8 @@ package me.binhnguyen.seraphina.controller;
 
 import lombok.RequiredArgsConstructor;
 import me.binhnguyen.seraphina.common.DataRecord;
-import me.binhnguyen.seraphina.entity.ZaloChat;
-import me.binhnguyen.seraphina.service.ZaloChatService;
+import me.binhnguyen.seraphina.entity.Subscriber;
+import me.binhnguyen.seraphina.service.SubscriberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,8 +12,8 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/zalo/chat")
-public class ZaloChatController extends BaseController {
-  private final ZaloChatService zaloChatService;
+public class SubscriberController extends BaseController {
+  private final SubscriberService subscriberService;
 
   @PostMapping("/subscribe")
   public ResponseEntity<DataRecord> subscribeChat(@RequestBody DataRecord request) {
@@ -21,7 +21,7 @@ public class ZaloChatController extends BaseController {
     String name = String.valueOf(request.get("chat_name"));
     DataRecord response = new DataRecord();
 
-    ZaloChat exist = zaloChatService.getSubscriber(lookupId);
+    Subscriber exist = subscriberService.getSubscriber(lookupId);
     if (Objects.nonNull(exist)) {
       return ResponseEntity.ok(
         response
@@ -30,7 +30,7 @@ public class ZaloChatController extends BaseController {
       );
     }
 
-    ZaloChat chat = zaloChatService.subscribe(lookupId, name);
+    Subscriber chat = subscriberService.subscribe(lookupId, name);
 
     boolean success = !chat.isNew();
     if (!success) {
@@ -50,7 +50,7 @@ public class ZaloChatController extends BaseController {
 
   @GetMapping("/subscribe/get")
   public ResponseEntity<DataRecord> getSubscriber(@RequestParam("chat_id") String chatId) {
-    ZaloChat chat = zaloChatService.getSubscriber(chatId);
+    Subscriber chat = subscriberService.getSubscriber(chatId);
     DataRecord response = new DataRecord();
     if (Objects.isNull(chat)) {
       return ResponseEntity.ok(
@@ -69,7 +69,7 @@ public class ZaloChatController extends BaseController {
 
   @PostMapping("/unsubscribe")
   public ResponseEntity<DataRecord> unsubscribeChat(@RequestParam("chat_id") String chatId) {
-    boolean success = zaloChatService.unsubscribe(chatId);
+    boolean success = subscriberService.unsubscribe(chatId);
     DataRecord response = new DataRecord();
     if (!success) {
       ResponseEntity.ok(

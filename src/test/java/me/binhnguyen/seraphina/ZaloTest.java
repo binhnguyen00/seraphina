@@ -1,8 +1,8 @@
 package me.binhnguyen.seraphina;
 
-import me.binhnguyen.seraphina.controller.ZaloChatController;
-import me.binhnguyen.seraphina.entity.ZaloChat;
-import me.binhnguyen.seraphina.service.ZaloChatService;
+import me.binhnguyen.seraphina.controller.SubscriberController;
+import me.binhnguyen.seraphina.entity.Subscriber;
+import me.binhnguyen.seraphina.service.SubscriberService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,12 +15,12 @@ import java.util.List;
 public class ZaloTest {
 
   @Autowired
-  private ZaloChatController controller;
+  private SubscriberController controller;
 
   @Autowired
-  private ZaloChatService service;
+  private SubscriberService service;
 
-  private ZaloChat chat;
+  private Subscriber chat;
 
   @BeforeEach
   void init() {
@@ -34,7 +34,7 @@ public class ZaloTest {
 
   @Test
   public void testSendMessage() {
-    List<ZaloChat> subscribers = service.getAllSubscribers();
+    List<Subscriber> subscribers = service.getAllSubscribers();
     service.sendMessageTo(subscribers, "This is a test message");
   }
 }

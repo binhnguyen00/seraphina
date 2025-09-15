@@ -1,5 +1,4 @@
 import os;
-import requests;
 import secrets;
 
 from typing import Optional;
@@ -11,7 +10,12 @@ from zalo_bot.ext import Dispatcher, CommandHandler, MessageHandler, filters;
 load_dotenv()
 
 from Dto import Request, Response;
-from EventCallBacks import subscribe, unsubscribe, get_schedule, help, health_check;
+from EventCallBacks import (
+  subscribe, unsubscribe, 
+  get_schedule, 
+  follow_premier_league, follow_laliga, 
+  help, health_check
+)
 
 app = Flask(__name__)
 with app.app_context():
@@ -31,6 +35,8 @@ with app.app_context():
   dispatcher.add_handler(CommandHandler("dangky", subscribe))
   dispatcher.add_handler(CommandHandler("huydangky", unsubscribe))
   dispatcher.add_handler(CommandHandler("lichtuan", get_schedule))
+  dispatcher.add_handler(CommandHandler("follow-premier-league", follow_premier_league))
+  dispatcher.add_handler(CommandHandler("follow-laliga", follow_laliga))
   dispatcher.add_handler(CommandHandler("health", health_check))
   # catch all text messages except commands (start with /)
   dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, help)) # type: ignore

@@ -7,18 +7,15 @@ import me.binhnguyen.seraphina.repository.LeagueRepo;
 import me.binhnguyen.seraphina.service.LaligaService;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
 import me.binhnguyen.seraphina.service.SeasonService;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 
 @Slf4j
-@Component
-@Profile("dev")
+// @Component
 @RequiredArgsConstructor
-public class DevDataInit {
+public class ProductionDataInit {
   private final LeagueRepo leagueRepo;
   private final SeasonService seasonService;
   private final LaligaService laligaService;

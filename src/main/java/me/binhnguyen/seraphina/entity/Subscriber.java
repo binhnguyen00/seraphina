@@ -8,13 +8,13 @@ import me.binhnguyen.seraphina.common.BaseEntity;
 
 import java.util.List;
 
-@Table(name = ZaloChat.TABLE_NAME)
+@Table(name = Subscriber.TABLE_NAME)
 @Entity
 @NoArgsConstructor
-public class ZaloChat extends BaseEntity {
-  public static final String TABLE_NAME = "zalo_chat";
+public class Subscriber extends BaseEntity {
+  public static final String TABLE_NAME = "subscriber";
 
-  public ZaloChat(String lookupId, String name) {
+  public Subscriber(String lookupId, String name) {
     this.name = name;
     this.lookupId = lookupId;
   }
@@ -29,8 +29,8 @@ public class ZaloChat extends BaseEntity {
   @Getter @Setter
   @ManyToMany
   @JoinTable(
-    name = "zalo_chat_following_league",
-    joinColumns = @JoinColumn(name = "zalo_chat_id"),     // FK to ZaloChat
+    name = "subscriber_following_league",
+    joinColumns = @JoinColumn(name = "subscriber_id"),    // FK to Subscriber
     inverseJoinColumns = @JoinColumn(name = "league_id")  // FK to League
   )
   private List<League> followingLeagues;

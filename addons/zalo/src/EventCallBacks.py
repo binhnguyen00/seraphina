@@ -66,6 +66,38 @@ async def get_schedule(update: Update, context):
   matches: str = response_data.get("data", "")
   await update.message.reply_text(matches) # type: ignore
 
+async def follow_premier_league(update: Update, context):
+  logger.info(f"User {update.effective_user.id} follow premier league") # type: ignore
+  if (not update.effective_user):
+    return
+
+  response = requests.post(url="http://app:8080/api/v1/premier-league/follow", json={ 
+    "chat_id": update.effective_user.id,
+    "league_code": "eng.1"
+  })
+  response_data: dict = response.json()
+  if (not response_data.get("success", False)):
+    await update.message.reply_text(f"Theo dõi thất bại!") # type: ignore
+    return
+
+  await update.message.reply_text(f"Theo dõi thành công!") # type: ignore
+
+async def follow_laliga(update: Update, context):
+  logger.info(f"User {update.effective_user.id} follow laliga") # type: ignore
+  if (not update.effective_user):
+    return
+
+  response = requests.post(url="http://app:8080/api/v1/laliga/follow", json={ 
+    "chat_id": update.effective_user.id,
+    "league_code": "esp.1"
+  })
+  response_data: dict = response.json()
+  if (not response_data.get("success", False)):
+    await update.message.reply_text(f"Theo dõi thất bại!") # type: ignore
+    return
+
+  await update.message.reply_text(f"Theo dõi thành công!") # type: ignore
+
 async def health_check(update: Update, context):
   logger.info(f"User {update.effective_user.id} is checking api health") # type: ignore
   response = requests.get(url="http://app:8080/api/v1/zalo/chat/health")

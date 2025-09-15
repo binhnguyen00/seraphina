@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.Matchup;
-import me.binhnguyen.seraphina.entity.ZaloChat;
+import me.binhnguyen.seraphina.entity.Subscriber;
 import me.binhnguyen.seraphina.utils.MessageTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -17,7 +17,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class AutomationService {
-  private final ZaloChatService zaloService;
+  private final SubscriberService zaloService;
   private final PremierLeagueService premierLeagueService;
 
   /* Cron Example
@@ -63,7 +63,7 @@ public class AutomationService {
   public void notifyZalo() {
     List<Matchup> thisWeekMatches = premierLeagueService.getCurrentWeekMatches();
     String message = MessageTemplate.ZALO(thisWeekMatches);
-    List<ZaloChat> subscribers = zaloService.getAllSubscribers();
+    List<Subscriber> subscribers = zaloService.getAllSubscribers();
     zaloService.sendMessageTo(subscribers, message);
   }
 }

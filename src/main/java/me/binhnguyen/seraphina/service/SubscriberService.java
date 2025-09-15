@@ -2,8 +2,8 @@ package me.binhnguyen.seraphina.service;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import me.binhnguyen.seraphina.entity.ZaloChat;
-import me.binhnguyen.seraphina.repository.ZaloChatRepo;
+import me.binhnguyen.seraphina.entity.Subscriber;
+import me.binhnguyen.seraphina.repository.SubscriberRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -16,41 +16,41 @@ import java.util.Objects;
 
 @Slf4j
 @Service
-public class ZaloChatService {
+public class SubscriberService {
   private final WebClient webClient;
-  private final ZaloChatRepo repo;
+  private final SubscriberRepo repo;
 
   @Autowired
-  public ZaloChatService(
+  public SubscriberService(
     @Qualifier("microServiceZalo") WebClient webClient,
-    ZaloChatRepo repo
+    SubscriberRepo repo
   ) {
     this.webClient = webClient;
     this.repo = repo;
   }
 
-  public ZaloChat getSubscriber(String lookupId) {
+  public Subscriber getSubscriber(String lookupId) {
     return repo.getByLookupId(lookupId);
   }
 
-  public List<ZaloChat> getAllSubscribers() {
+  public List<Subscriber> getAllSubscribers() {
     return repo.findAll();
   }
 
   @Transactional
-  public ZaloChat subscribe(String lookupId, String name) {
-    ZaloChat exist = repo.getByLookupId(lookupId);
+  public Subscriber subscribe(String lookupId, String name) {
+    Subscriber exist = repo.getByLookupId(lookupId);
     if (!Objects.isNull(exist)) {
       log.warn("Chat {} with {} already registered", lookupId, name);
       return exist;
     }
-    ZaloChat record = new ZaloChat(lookupId, name);
+    Subscriber record = new Subscriber(lookupId, name);
     return repo.save(record);
   }
 
   @Transactional
   public boolean unsubscribe(String lookupId) {
-    ZaloChat exist = repo.getByLookupId(lookupId);
+    Subscriber exist = repo.getByLookupId(lookupId);
     if (Objects.isNull(exist)) {
       log.warn("Chat {} not found", lookupId);
       return false;
@@ -65,11 +65,11 @@ public class ZaloChatService {
   }
 
   @SuppressWarnings("unchecked")
-  public List<ZaloChat> sendMessageTo(List<ZaloChat> subscribers, String message) {
-    List<ZaloChat> failHolder = new ArrayList<>();
-    List<ZaloChat> successHolder = new ArrayList<>();
+  public List<Subscriber> sendMessageTo(List<Subscriber> subscribers, String message) {
+    List<Subscriber> failHolder = new ArrayList<>();
+    List<Subscriber> successHolder = new ArrayList<>();
 
-    for (ZaloChat subscriber : subscribers) {
+    for (Subscriber subscriber : subscribers) {
       Map<String, Object> response = this.webClient.post()
         .uri(uriBuilder -> uriBuilder
           .path("/send-message")
