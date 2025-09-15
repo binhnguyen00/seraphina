@@ -26,6 +26,8 @@ async def subscribe(update: Update, context):
   response = requests.post(url="http://localhost:8080/api/v1/zalo/chat/subscribe", json={"chat_id": chat_id, "chat_name": chat_name})
   response_data: dict = response.json()
 
+  print(response_data)
+
   if (not response_data.get("success", False)):
     await update.message.reply_text(f"Đăng ký thất bại!") # type: ignore
     return

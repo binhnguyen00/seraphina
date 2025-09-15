@@ -18,14 +18,13 @@ services:
     build:
       context: .
       dockerfile: dockerfile
-    container_name: seraphina
     ports:
       - "8080:8080"
     volumes:
       - ./logs:/logs
     environment:
       - JAVA_OPTS=-Xms256m -Xmx512m
-      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:${DB_PORT}/${DB_NAME}
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
@@ -41,7 +40,6 @@ services:
     build:
       context: ./addons/zalo
       dockerfile: dockerfile
-    container_name: zalo_bot
     ports:
       - "${MICROSERVICE_ZALO_PORT}:${MICROSERVICE_ZALO_PORT}"
     volumes:
@@ -57,7 +55,6 @@ services:
 
   ngrok:
     image: ngrok/ngrok:latest
-    container_name: ngrok_tunnel
     command: http --url=peaceful-partly-alpaca.ngrok-free.app zalo:${MICROSERVICE_ZALO_PORT}
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}

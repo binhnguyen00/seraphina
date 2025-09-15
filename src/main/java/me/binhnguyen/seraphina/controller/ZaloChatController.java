@@ -11,7 +11,7 @@ import java.util.Objects;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/zalo/chat")
+@RequestMapping("/api/v1/zalo/chat")
 public class ZaloChatController extends BaseController {
   private final ZaloChatService zaloChatService;
 

@@ -21,7 +21,7 @@ public class WebClientConfig {
   @Qualifier("microServiceZalo")
   public WebClient zaloWebClient() {
     return WebClient.builder()
-      .baseUrl("http://localhost:8081")
+      .baseUrl("http://zalo:8081")
       .defaultHeader("Content-Type", "application/json; charset=utf-8")
       .build();
   }

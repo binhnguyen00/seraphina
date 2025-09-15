@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/monitor/jobs")
+@RequestMapping("/api/v1/monitor/jobs")
 @RequiredArgsConstructor
 public class JobsMonitorController extends BaseController {
   private final JobsMonitorService monitorService;

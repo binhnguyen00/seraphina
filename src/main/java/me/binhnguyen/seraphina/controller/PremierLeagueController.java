@@ -18,7 +18,7 @@ import java.util.Objects;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/premier-league")
+@RequestMapping("/api/v1/premier-league")
 public class PremierLeagueController extends BaseController {
   private final SeasonService seasonService;
   private final ZaloChatService zaloChatService;
