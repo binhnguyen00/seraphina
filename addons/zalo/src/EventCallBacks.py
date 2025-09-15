@@ -16,14 +16,14 @@ async def subscribe(update: Update, context):
   chat_id: Optional[str] = update.effective_user.id
   chat_name: Optional[str] = update.effective_user.display_name
 
-  response: requests.Response = requests.get(url="http://localhost:8080/api/v1/zalo/chat/subscribe/get", params={"chat_id": chat_id})
+  response: requests.Response = requests.get(url="http://app:8080/api/v1/zalo/chat/subscribe/get", params={"chat_id": chat_id})
   response_data: dict = response.json()
   exist: bool = response_data.get("success", False)
   if (exist): 
     await update.message.reply_text(f"Tài khoản đã đăng ký trước đó!") # type: ignore
     return
 
-  response = requests.post(url="http://localhost:8080/api/v1/zalo/chat/subscribe", json={"chat_id": chat_id, "chat_name": chat_name})
+  response = requests.post(url="http://app:8080/api/v1/zalo/chat/subscribe", json={"chat_id": chat_id, "chat_name": chat_name})
   response_data: dict = response.json()
 
   print(response_data)
@@ -42,7 +42,7 @@ async def unsubscribe(update: Update, context):
   await update.message.reply_text(f"Tạm biệt {update.effective_user.display_name}! Cảm ơn bạn và hẹn gặp lại!") # type: ignore
 
   target_id: Optional[str] = update.effective_user.id
-  response = requests.post(url="http://localhost:8080/api/v1/zalo/chat/unsubscribe", params={"chat_id": target_id})
+  response = requests.post(url="http://app:8080/api/v1/zalo/chat/unsubscribe", params={"chat_id": target_id})
   response_data: dict = response.json()
 
   if (not response_data.get("success", False)):
@@ -56,7 +56,7 @@ async def get_schedule(update: Update, context):
   if (not update.effective_user):
     return
 
-  response = requests.get(url="http://localhost:8080/api/v1/premier-league/schedule/matches", params={ "chat_id": update.effective_user.id })
+  response = requests.get(url="http://app:8080/api/v1/premier-league/schedule/matches", params={ "chat_id": update.effective_user.id })
   response_data: dict = response.json()
   if (not response_data.get("success", False)):
     message: str = response_data.get("message", "")
@@ -68,7 +68,7 @@ async def get_schedule(update: Update, context):
 
 async def health_check(update: Update, context):
   logger.info(f"User {update.effective_user.id} is checking api health") # type: ignore
-  response = requests.get(url="http://localhost:8080/api/v1/health")
+  response = requests.get(url="http://app:8080/api/v1/health")
   response_data: dict = response.json()
   if (not response_data.get("success", False)):
     await update.message.reply_text(f"Server is not ready!") # type: ignore
