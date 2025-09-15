@@ -9,6 +9,7 @@ import me.binhnguyen.seraphina.common.DatePattern;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
@@ -64,7 +65,9 @@ public class Matchup extends BaseEntity {
   }
 
   public String getFormatMatchDay() {
-    return this.matchDay.format(DateTimeFormatter.ofPattern(DatePattern.READABLE_DATETIME));
+    return this.matchDay
+      .atZoneSameInstant(ZoneId.of("Asia/Ho_Chi_Minh")) // adjust to +07
+      .format(DateTimeFormatter.ofPattern(DatePattern.READABLE_DATETIME));
   }
 
   @PrePersist

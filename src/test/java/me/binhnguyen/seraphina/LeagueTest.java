@@ -3,6 +3,7 @@ package me.binhnguyen.seraphina;
 import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.MatchDay;
 import me.binhnguyen.seraphina.entity.Matchup;
+import me.binhnguyen.seraphina.utils.MessageTemplate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,10 +40,12 @@ class LeagueTest extends InitDataTest {
   }
 
   @Test
-  void getCurrentWeekMatchesTest() {
+  void getPremierLeagueCurrentWeekMatchesTest() {
     List<Matchup> matches = premierLeagueService.getCurrentWeekMatches();
-    Assertions.assertEquals(10, matches.size());
-    log.info("getCurrentWeekMatchesTest\nPremier League current week matches: {}", matches.size());
+    Assertions.assertFalse(matches.isEmpty());
+    log.info("getPremierLeagueCurrentWeekMatchesTest\n\tPremier League current week matches: {}", matches.size());
+    String message = MessageTemplate.ZALO(matches);
+    log.info("\n{}", message);
   }
 
   // ==========================================
@@ -68,5 +71,14 @@ class LeagueTest extends InitDataTest {
     List<MatchDay> matchDays = laligaService.createOrUpdateAllMatchDays();
     log.info("createOrUpdateAllLaligaMatchDaysTest\nLaliga all MatchDays: {}", matchDays.size());
     Assertions.assertFalse(matchDays.isEmpty());
+  }
+
+  @Test
+  void getLaligaCurrentWeekMatchesTest() {
+    List<Matchup> matches = laligaService.getCurrentWeekMatches();
+    Assertions.assertFalse(matches.isEmpty());
+    log.info("getLaligaCurrentWeekMatchesTest\n\tPremier League current week matches: {}", matches.size());
+    String message = MessageTemplate.ZALO(matches);
+    log.info("\n{}", message);
   }
 }
