@@ -2,6 +2,7 @@ package me.binhnguyen.seraphina;
 
 import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.MatchDay;
+import me.binhnguyen.seraphina.entity.Matchup;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,6 +36,13 @@ class LeagueTest extends InitDataTest {
     List<MatchDay> matchDays = premierLeagueService.createOrUpdateAllMatchDays();
     log.info("createOrUpdateAllPremierLeagueMatchDaysTest\nPremier League all MatchDays: {}", matchDays.size());
     Assertions.assertFalse(matchDays.isEmpty());
+  }
+
+  @Test
+  void getCurrentWeekMatchesTest() {
+    List<Matchup> matches = premierLeagueService.getCurrentWeekMatches();
+    Assertions.assertEquals(10, matches.size());
+    log.info("getCurrentWeekMatchesTest\nPremier League current week matches: {}", matches.size());
   }
 
   // ==========================================

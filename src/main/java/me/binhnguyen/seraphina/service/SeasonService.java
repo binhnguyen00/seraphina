@@ -27,7 +27,9 @@ public class SeasonService {
       log.warn("Season {} already exists", year);
       return exist;
     }
-    return this.save(new Season());
+    Season season = this.save(new Season());
+    log.info("Season {} created", season.getYear());
+    return season;
   }
 
   public Season save(Season season) {

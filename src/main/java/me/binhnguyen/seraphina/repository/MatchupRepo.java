@@ -16,6 +16,13 @@ public interface MatchupRepo extends JpaRepository<Matchup, Persistence> {
   @Query("SELECT m FROM Matchup m WHERE m.matchDay BETWEEN :from AND :to ORDER BY m.matchDay ASC")
   List<Matchup> getByMatchDayBetween(OffsetDateTime from, OffsetDateTime to);
 
-  @Query("SELECT m FROM Matchup m WHERE m.matchDay = :matchDay AND m.league.code = :leagueId ORDER BY m.matchDay ASC")
-  List<Matchup> getByMatchDay(OffsetDateTime matchDay, String leagueId);
+  @Query("""
+    SELECT m FROM Matchup m
+    WHERE
+      m.matchDay BETWEEN :start AND :end
+    AND
+      m.league.code = :leaguecode
+    ORDER BY m.matchDay ASC
+  """)
+  List<Matchup> getByMatchDay(OffsetDateTime start, OffsetDateTime end, String leaguecode);
 }

@@ -70,11 +70,10 @@ public abstract class LeagueService {
 
   /** create/update this season match days */
   public List<MatchDay> createOrUpdateAllMatchDays() {
-    final String LEAGUE_CODE = this.getCode();
+    final League league = this.get();
     List<MatchDay> matchDays = this.getAllMatchDays();
-    List<LocalDate> schedules = crawlerService.pullCurrentSeasonScheduleMatchDays(LEAGUE_CODE);
+    List<LocalDate> schedules = crawlerService.pullCurrentSeasonScheduleMatchDays(league.getCode());
 
-    League league = leagueRepo.getByCode(LEAGUE_CODE);
     Season season = seasonService.getCurrentSeason();
     List<MatchDay> holder = new ArrayList<>();
     if (matchDays.isEmpty()) {
@@ -95,26 +94,20 @@ public abstract class LeagueService {
       }
     }
 
-    return matchDayRepo.saveAll(holder);
-  }
-
-  /** Create/Update matches from all league */
-  @Transactional
-  public List<Matchup> createOrUpdateMatchups(LocalDate from, LocalDate to) {
-    List<League> leagues = leagueRepo.findAll();
-    List<Matchup> savedMatchups = new ArrayList<>();
-
-    for (League league : leagues) {
-      List<Matchup> matches = this.createOrUpdateMatchups(league, from, to);
-      savedMatchups.addAll(matches);
+    try {
+      holder = matchDayRepo.saveAll(holder);
+      log.info("{} create/update {} match days", league.getName(), holder.size());
+      return holder;
+    } catch (Exception e) {
+      log.error("Failed to create/update match days", e);
+      return Collections.emptyList();
     }
-
-    return savedMatchups;
   }
 
   /** Create/Update matches from target league. */
   @Transactional
-  public List<Matchup> createOrUpdateMatchups(League league, LocalDate from, LocalDate to) {
+  public List<Matchup> createOrUpdateMatchups(LocalDate from, LocalDate to) {
+    final League league = this.get();
     Season season = seasonService.getCurrentSeason();
     List<Matchup> toCreates = new ArrayList<>();
     List<Matchup> toUpdates = new ArrayList<>();
@@ -134,6 +127,7 @@ public abstract class LeagueService {
         toCreates.add(matchup);
       } else {
         exist.setSeason(season);
+        exist.setLeague(league);
         exist.setHomeTeam(matchup.getHomeTeam());
         exist.setAwayTeam(matchup.getAwayTeam());
         exist.setMatchDay(matchup.getMatchDay());
@@ -142,21 +136,23 @@ public abstract class LeagueService {
     }
 
     if (!toCreates.isEmpty()) savedMatchups.addAll(matchupRepo.saveAll(toCreates));
-    log.info("Created {} matches", toCreates.size());
+    log.info("{} Created {} matches", league.getName(), toCreates.size());
     if (!toUpdates.isEmpty()) savedMatchups.addAll(matchupRepo.saveAll(toUpdates));
-    log.info("Updated {} matches", toUpdates.size());
+    log.info("{} Updated {} matches", league.getName(), toUpdates.size());
 
     return savedMatchups;
   }
 
   @SuppressWarnings("unchecked")
   public List<Matchup> toMatchups(List<Map<String, Object>> matches) {
+    final League league = this.get();
+    final Season season = seasonService.getCurrentSeason();
     List<Matchup> matchups = new ArrayList<>();
     for (Map<String, Object> match : matches) {
       Matchup matchup = new Matchup();
       List<Map<String, Object>> competitors = (List<Map<String, Object>>) match.get("competitors");
       for (Map<String, Object> competitor : competitors) {
-        String teamCode = competitor.getOrDefault("teamCode", "").toString();
+        String teamCode = competitor.getOrDefault("teamCode", "").toString().toLowerCase();
         String homeAway = competitor.getOrDefault("homeAway", "").toString();
         boolean isHome = homeAway.equals("home");
         Team team = teamRepo.getByCode(teamCode);
@@ -171,7 +167,8 @@ public abstract class LeagueService {
       matchup.setMatchDay(utcTime.withOffsetSameInstant(ZoneOffset.of("+07:00"))); // Parse and convert to Vietnam offset (+07:00)
       matchup.setOriginMatchDay(utcTime.toLocalDateTime());
       matchup.setHomeStadium(homeStadium);
-      matchup.setNotified(false);
+      matchup.setSeason(season);
+      matchup.setLeague(league);
       matchups.add(matchup);
     }
 
@@ -180,18 +177,15 @@ public abstract class LeagueService {
 
   /** returns current week scheduled matches */
   public List<Matchup> getCurrentWeekMatches() {
-    final String LEAGUE_CODE = this.getCode();
-    LocalDate today = LocalDate.now();
-    LocalDate from = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-    LocalDate to = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
-
+    final League league = this.get();
     List<Matchup> matches = new ArrayList<>();
-    List<MatchDay> thisWeekMatchDays = matchDayRepo.findByDateRange(from, to);
+    List<MatchDay> thisWeekMatchDays = this.getThisWeekMatchDays();
     for (MatchDay matchDay : thisWeekMatchDays) {
-      OffsetDateTime date = matchDay.getDate().atStartOfDay(ZoneOffset.UTC).toOffsetDateTime();
-      List<Matchup> matchups = matchupRepo.getByMatchDay(date, LEAGUE_CODE);
+      OffsetDateTime start = matchDay.getDate().atStartOfDay(ZoneOffset.UTC).toOffsetDateTime();
+      OffsetDateTime end = start.plusDays(1).minusNanos(1);
+      List<Matchup> matchups = matchupRepo.getByMatchDay(start, end, league.getCode());
       if (matchups.isEmpty()) {
-        log.info("No matches found on this date {}", date);
+        log.info("{} No matches found on this date {}", league.getName(), start);
         continue;
       }
       matches.addAll(matchups);
@@ -202,19 +196,18 @@ public abstract class LeagueService {
 
   @Transactional
   public List<Team> createOrUpdateTeams() {
-    final String LEAGUE_CODE = this.getCode();
-    List<Team> teams = crawlerService.pullTeams(LEAGUE_CODE);
+    final League league = this.get();
+    List<Team> teams = crawlerService.pullTeams(league.getCode());
     if (teams.isEmpty())
       return Collections.emptyList();
 
     List<Team> toCreates = new ArrayList<>();
     List<Team> toUpdates = new ArrayList<>();
 
-    League premierLeague = leagueRepo.getByCode(LEAGUE_CODE);
     teams.forEach(team -> {
       Team exist = teamRepo.getByCode(team.getCode());
       if (Objects.isNull(exist)) {
-        team.setLeague(premierLeague);
+        team.setLeague(league);
         toCreates.add(team);
       } else {
         exist.setName(team.getName());
@@ -227,8 +220,8 @@ public abstract class LeagueService {
     List<Team> savedTeams = new ArrayList<>();
     if (!toCreates.isEmpty()) savedTeams.addAll(teamRepo.saveAll(toCreates));
     if (!toUpdates.isEmpty()) savedTeams.addAll(teamRepo.saveAll(toUpdates));
-    log.info("Created {} teams", toCreates.size());
-    log.info("Updated {} teams", toUpdates.size());
+    log.info("{} Created {} teams", league.getName(), toCreates.size());
+    log.info("{} Updated {} teams", league.getName(), toUpdates.size());
     return savedTeams;
   }
 }

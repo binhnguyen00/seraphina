@@ -1,24 +1,19 @@
 package me.binhnguyen.seraphina;
 
 import lombok.extern.slf4j.Slf4j;
-import me.binhnguyen.seraphina.entity.League;
-import me.binhnguyen.seraphina.entity.MatchDay;
 import me.binhnguyen.seraphina.entity.Season;
-import me.binhnguyen.seraphina.entity.Team;
-import me.binhnguyen.seraphina.service.CrawlerService;
 import me.binhnguyen.seraphina.service.LaligaService;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
 import me.binhnguyen.seraphina.service.SeasonService;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 
 @Slf4j
 public abstract class InitDataTest {
-
-  @Autowired
-  public CrawlerService crawlerService;
 
   @Autowired
   public SeasonService seasonService;
@@ -35,6 +30,7 @@ public abstract class InitDataTest {
     initLeague();
     initTeams();
     initMatchDays();
+    initThisWeekMatchups();
   }
 
   private void initSeason() {
@@ -48,10 +44,8 @@ public abstract class InitDataTest {
 
   private void initLeague() {
     try {
-      League premierLeague = premierLeagueService.create();
-      League laliga = laligaService.create();
-      log.info("{} created", premierLeague.getName());
-      log.info("{} created", laliga.getName());
+      premierLeagueService.create();
+      laligaService.create();
     } catch (Exception e) {
       log.error("Failed to initialize leagues", e);
     }
@@ -59,10 +53,8 @@ public abstract class InitDataTest {
 
   private void initTeams() {
     try {
-      List<Team> premierLeagueTeams = premierLeagueService.createOrUpdateTeams();
-      List<Team> laligaTeams = laligaService.createOrUpdateTeams();
-      log.info("Premier League Teams created. {} teams", premierLeagueTeams.size());
-      log.info("Laliga Teams created. {} teams", laligaTeams.size());
+      premierLeagueService.createOrUpdateTeams();
+      laligaService.createOrUpdateTeams();
     } catch (Exception e) {
       log.error("Failed to initialize teams", e);
     }
@@ -70,12 +62,23 @@ public abstract class InitDataTest {
 
   private void initMatchDays() {
     try {
-      List<MatchDay> premierLeagueMatchDays = premierLeagueService.createOrUpdateAllMatchDays();
-      List<MatchDay> laligaMatchDays = laligaService.createOrUpdateAllMatchDays();
-      log.info("Premier League MatchDays created. {} match days", premierLeagueMatchDays.size());
-      log.info("Laliga MatchDays created. {} match days", laligaMatchDays.size());
+      premierLeagueService.createOrUpdateAllMatchDays();
+      laligaService.createOrUpdateAllMatchDays();
     } catch (Exception e) {
       log.error("Failed to initialize match days", e);
+    }
+  }
+
+  private void initThisWeekMatchups() {
+    final LocalDate today = LocalDate.now();
+    final LocalDate THIS_MONDAY = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+    final LocalDate THIS_SUNDAY = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+
+    try {
+      premierLeagueService.createOrUpdateMatchups(THIS_MONDAY, THIS_SUNDAY);
+      laligaService.createOrUpdateMatchups(THIS_MONDAY, THIS_SUNDAY);
+    } catch (Exception e) {
+      log.error("Failed to initialize this week matchups", e);
     }
   }
 }
