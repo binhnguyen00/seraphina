@@ -71,27 +71,6 @@ async def send_message():
       message=str(e)
     ).to_dict()
 
-@app.route('/me', methods=['GET'])
-async def get_me():
-  entrypoint: str = f"https://bot-api.zapps.me/bot{BOT_TOKEN}/getMe"
-  response: requests.Response = requests.get(url=entrypoint)
-  response_data: dict = response.json()
-  result: dict = response_data.get("result", {})
-  
-  if (not result.get("ok", False)):
-    return Response(
-      status=500,
-      success=False,
-      message="Get me failed"
-    ).to_dict()
-
-  return Response(
-    status=200,
-    success=True, 
-    message="Get me successfully",
-    data=result
-  ).to_dict()
-
 @app.route('/health', methods=['GET'])
 def health():
   return Response(

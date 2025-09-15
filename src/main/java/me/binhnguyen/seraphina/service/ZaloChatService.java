@@ -1,5 +1,6 @@
 package me.binhnguyen.seraphina.service;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.ZaloChat;
 import me.binhnguyen.seraphina.repository.ZaloChatRepo;
@@ -36,6 +37,7 @@ public class ZaloChatService {
     return repo.findAll();
   }
 
+  @Transactional
   public ZaloChat subscribe(String lookupId, String name) {
     ZaloChat exist = repo.getByLookupId(lookupId);
     if (!Objects.isNull(exist)) {
@@ -46,6 +48,7 @@ public class ZaloChatService {
     return repo.save(record);
   }
 
+  @Transactional
   public boolean unsubscribe(String lookupId) {
     ZaloChat exist = repo.getByLookupId(lookupId);
     if (Objects.isNull(exist)) {

@@ -68,7 +68,7 @@ async def get_schedule(update: Update, context):
 
 async def health_check(update: Update, context):
   logger.info(f"User {update.effective_user.id} is checking api health") # type: ignore
-  response = requests.get(url="http://app:8080/api/v1/health")
+  response = requests.get(url="http://app:8080/api/v1/zalo/chat/health")
   response_data: dict = response.json()
   if (not response_data.get("success", False)):
     await update.message.reply_text(f"Server is not ready!") # type: ignore
@@ -89,6 +89,12 @@ Chúng tôi cung cấp thông tin lịch đá bóng hàng tuần của các đ�
 
 Hủy đăng ký nhận thông báo bằng cú pháp:
     /huydangky
+
+Theo dõi Ngoại Hạng Anh bằng cú pháp:
+    /follow-premier-league
+
+Theo dõi Laliga bằng cú pháp:
+    /follow-laliga
 
 Xem lịch tuần này bằng cú pháp:
     /lichtuan
