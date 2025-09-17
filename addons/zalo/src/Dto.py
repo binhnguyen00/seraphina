@@ -2,7 +2,7 @@ from pydantic import BaseModel;
 from typing import Optional;
 
 class Request(BaseModel):
-  chat_id: str
+  user_id: str
   message: str
 
 class Response(BaseModel):

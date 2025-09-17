@@ -26,74 +26,34 @@ public class SubscriberController extends BaseController {
 
     Subscriber exist = subscriberService.getSubscriber(lookupId);
     if (Objects.nonNull(exist)) {
-      return ResponseEntity.ok(new Response(
-        false,
-        "Chat already registered",
-        null
-      ));
+      return ResponseEntity.ok(Response.SUCCESS("Bạn đã đăng ký", lookupId));
     }
 
-    SubscriberService.SubscribeResult result = subscriberService.subscribe(lookupId, name);
+    SubscriberService.ServiceResult result = subscriberService.subscribe(lookupId, name);
     League premierLeague = premierLeagueService.get();
-    subscriberService.follow(lookupId, premierLeague.getCode());
+    subscriberService.followLeague(lookupId, premierLeague.getCode());
 
-    boolean success = !result.isNew();
-    if (!success) {
-      return ResponseEntity.ok(new Response(
-        false,
-        "Register user failed",
-        null
-      ));
+    if (!result.success()) {
+      return ResponseEntity.ok(Response.FAIL(result.message()));
     }
-    return ResponseEntity.ok(new Response(
-      true,
-      "Registered successfully",
-      result.subscriber().getLookupId()
-    ));
+    return ResponseEntity.ok(Response.SUCCESS(result.message(), result.subscriber().getLookupId()));
   }
 
   @GetMapping("/subscribe/get")
-  public ResponseEntity<DataRecord> getSubscriber(@RequestParam("user_id") String lookupId) {
+  public ResponseEntity<Response> getSubscriber(@RequestParam("user_id") String lookupId) {
     Subscriber subscriber = subscriberService.getSubscriber(lookupId);
-    DataRecord response = new DataRecord();
     if (Objects.isNull(subscriber)) {
-      return ResponseEntity.ok(
-        response
-          .with("success", false)
-          .with("message", "Chat not found")
-      );
+      return ResponseEntity.ok(Response.FAIL("Người dùng chưa đăng ký", lookupId));
     }
-    return ResponseEntity.ok(
-      response
-        .with("success", true)
-        .with("data", subscriber.getLookupId())
-        .with("message", "Chat found")
-    );
+    return ResponseEntity.ok(Response.SUCCESS("Tìm thấy người dùng", lookupId));
   }
 
   @PostMapping("/unsubscribe")
-  public ResponseEntity<DataRecord> unsubscribeChat(@RequestParam("user_id") String lookupId) {
+  public ResponseEntity<Response> unsubscribe(@RequestParam("user_id") String lookupId) {
     boolean success = subscriberService.unsubscribe(lookupId);
-    DataRecord response = new DataRecord();
     if (!success) {
-      ResponseEntity.ok(
-        response
-          .with("success", false)
-          .with("message", "Unregister chat failed")
-      );
+      return ResponseEntity.ok(Response.FAIL("Hủy đăng ký không thành công", lookupId));
     }
-    return ResponseEntity.ok(
-      response
-        .with("success", true)
-        .with("message", "Chat unregistered successfully")
-    );
-  }
-  
-  @PostMapping("/follow")
-  public ResponseEntity<DataRecord> followLeague(
-    @RequestParam("user_id") String lookupId,
-    @RequestParam("league_code") String leagueCode
-  ) {
-    return null;
+    return ResponseEntity.ok(Response.SUCCESS("Hủy đăng ký thành công", lookupId));
   }
 }

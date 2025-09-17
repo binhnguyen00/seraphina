@@ -14,6 +14,7 @@ from EventCallBacks import (
   subscribe, unsubscribe, 
   get_schedule, 
   follow_premier_league, follow_laliga, 
+  unfollow_premier_league, unfollow_laliga,
   help, health_check
 )
 
@@ -32,13 +33,37 @@ with app.app_context():
   bot.set_webhook(url=WEBHOOK_URL, secret_token=WEBHOOK_SECRET_TOKEN)
 
   dispatcher = Dispatcher(bot, None, workers=0)
-  dispatcher.add_handler(CommandHandler("dangky", subscribe))
-  dispatcher.add_handler(CommandHandler("huydangky", unsubscribe))
-  dispatcher.add_handler(CommandHandler("lichtuan", get_schedule))
-  dispatcher.add_handler(CommandHandler("follow-premier-league", follow_premier_league))
-  dispatcher.add_handler(CommandHandler("follow-laliga", follow_laliga))
+
   dispatcher.add_handler(CommandHandler("health", health_check))
-  # catch all text messages except commands (start with /)
+
+  dispatcher.add_handler(MessageHandler(filters.BaseFilter(
+    lambda update: bool(update.message and update.message.text and update.message.text.lower().strip() == "đăng ký")
+  ), subscribe)) # type: ignore
+
+  dispatcher.add_handler(MessageHandler(filters.BaseFilter(
+    lambda update: bool(update.message and update.message.text and update.message.text.lower().strip() == "hủy đăng ký")
+  ), unsubscribe)) # type: ignore
+
+  dispatcher.add_handler(MessageHandler(filters.BaseFilter(
+    lambda update: bool(update.message and update.message.text and update.message.text.lower().strip() == "lịch tuần")
+  ), get_schedule)) # type: ignore
+
+  dispatcher.add_handler(MessageHandler(filters.BaseFilter(
+    lambda update: bool(update.message and update.message.text and update.message.text.lower().strip() == "theo dõi ngoại hạng anh")
+  ), follow_premier_league)) # type: ignore
+
+  dispatcher.add_handler(MessageHandler(filters.BaseFilter(
+    lambda update: bool(update.message and update.message.text and update.message.text.lower().strip() == "hủy theo dõi ngoại hạng anh")
+  ), unfollow_premier_league)) # type: ignore
+
+  dispatcher.add_handler(MessageHandler(filters.BaseFilter(
+    lambda update: bool(update.message and update.message.text and update.message.text.lower().strip() == "theo dõi laliga")
+  ), follow_laliga)) # type: ignore
+
+  dispatcher.add_handler(MessageHandler(filters.BaseFilter(
+    lambda update: bool(update.message and update.message.text and update.message.text.lower().strip() == "hủy theo dõi laliga")
+  ), unfollow_laliga)) # type: ignore
+
   dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, help)) # type: ignore
 
 @app.route('/webhook', methods=['POST'])
@@ -64,7 +89,7 @@ async def send_message():
   req = Request(**data)
 
   try:
-    await bot.send_message(chat_id=req.chat_id, text=req.message)
+    await bot.send_message(chat_id=req.user_id, text=req.message)
     return Response(
       status=200,
       success=True,

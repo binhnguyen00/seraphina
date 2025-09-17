@@ -6,7 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.binhnguyen.seraphina.common.BaseEntity;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Table(name = Subscriber.TABLE_NAME)
 @Entity
@@ -33,5 +34,5 @@ public class Subscriber extends BaseEntity {
     joinColumns = @JoinColumn(name = "subscriber_id"),    // FK to Subscriber
     inverseJoinColumns = @JoinColumn(name = "league_id")  // FK to League
   )
-  private List<League> followingLeagues;
+  private Set<League> followingLeagues = new HashSet<>();
 }

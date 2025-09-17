@@ -5,13 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.League;
 import me.binhnguyen.seraphina.entity.Subscriber;
 import me.binhnguyen.seraphina.repository.SubscriberRepo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -21,9 +23,8 @@ public class SubscriberService {
   private final LaligaService laligaService;
   private final PremierLeagueService premierLeagueService;
 
-  public record SubscribeResult(Subscriber subscriber, boolean isNew) {}
+  public record ServiceResult(boolean success, String message, Subscriber subscriber) {}
 
-  @Autowired
   public SubscriberService(
     @Qualifier("microServiceZalo") WebClient webClient,
     SubscriberRepo repo,
@@ -36,8 +37,12 @@ public class SubscriberService {
     this.premierLeagueService = premierLeagueService;
   }
 
+  @Transactional
   public Subscriber getSubscriber(String lookupId) {
-    return repo.getByLookupId(lookupId);
+    Subscriber subscriber = repo.getByLookupId(lookupId);
+    // pre-fetch following leagues. avoid "could not initialize proxy - no Session" error
+    if (Objects.nonNull(subscriber)) subscriber.getFollowingLeagues().size();
+    return subscriber;
   }
 
   public List<Subscriber> getAllSubscribers() {
@@ -45,14 +50,24 @@ public class SubscriberService {
   }
 
   @Transactional
-  public SubscribeResult subscribe(String lookupId, String name) {
+  public ServiceResult subscribe(String lookupId, String name) {
     Subscriber exist = repo.getByLookupId(lookupId);
-    if (!Objects.isNull(exist)) {
-      log.warn("Chat {} with {} already registered", lookupId, name);
-      return new SubscribeResult(exist, false);
+    if (Objects.nonNull(exist)) {
+      log.warn("Subscriber {} with name {} already registered", lookupId, name);
+      return new ServiceResult(
+        false,
+        String.format("Người dùng %s đã đăng ký", exist.getName()),
+        exist
+      );
     }
+    League premierLeague = premierLeagueService.get();
     Subscriber record = repo.save(new Subscriber(lookupId, name));
-    return new SubscribeResult(record,true);
+    this.followLeague(record.getLookupId(), premierLeague.getCode());
+    return new ServiceResult(
+      true,
+      "Đăng ký thành công!",
+      record
+    );
   }
 
   @Transactional
@@ -71,12 +86,26 @@ public class SubscriberService {
     }
   }
 
+  /**
+   * The method checks if the subscriber exists and if they are not already following
+   * the specified league. If all validations pass, the league is added to the
+   * subscriber's followed leagues.
+   *
+   * @param lookupId the unique identifier of the subscriber
+   * @param leagueCode the code of the league to follow (e.g., "eng.1" for Premier League, "esp.1" for LaLiga)
+   * @return ServiceResult containing the operation status, a message, and the updated list of followed leagues
+   * @see ServiceResult
+   */
   @Transactional
-  public List<League> follow(String lookupId, String leagueCode) {
+  public ServiceResult followLeague(String lookupId, String leagueCode) {
     Subscriber exist = repo.getByLookupId(lookupId);
     if (Objects.isNull(exist)) {
       log.warn("Can't follow league! Subscriber is {} not found", lookupId);
-      return Collections.emptyList();
+      return new ServiceResult(
+        false,
+        "Bạn chưa đăng ký",
+        null
+      );
     }
     League league = switch (leagueCode) {
       case "eng.1" -> premierLeagueService.get();
@@ -84,15 +113,58 @@ public class SubscriberService {
       default -> null;
     };
     if (Objects.isNull(league))
-      return exist.getFollowingLeagues();
+      return new ServiceResult(
+        false,
+        "Theo dõi giải đấu thất bại",
+        null
+      );
 
     if (exist.getFollowingLeagues().contains(league)) {
       log.warn("Subscriber {} is already following league {}", lookupId, leagueCode);
-      return exist.getFollowingLeagues();
+      return new ServiceResult(
+        false,
+        "Bạn đang theo dõi giải đấu này rồi",
+        null
+      );
     }
 
     exist.getFollowingLeagues().add(league);
-    return exist.getFollowingLeagues();
+    return new ServiceResult(
+      true,
+      String.format("Theo dõi giải đấu %s thành công", league.getName()),
+      null
+    );
+  }
+
+  @Transactional
+  public ServiceResult unfollowLeague(String lookupId, String leagueCode) {
+    Subscriber exist = repo.getByLookupId(lookupId);
+    if (Objects.isNull(exist)) {
+      log.warn("Can't unfollow league! Subscriber is {} not found", lookupId);
+      return new ServiceResult(
+        false,
+        "Bạn chưa đăng ký",
+        null
+      );
+    }
+    League league = switch (leagueCode) {
+      case "eng.1" -> premierLeagueService.get();
+      case "esp.1" -> laligaService.get();
+      default -> null;
+    };
+    if (Objects.isNull(league))
+      return new ServiceResult(
+        false,
+        "Hủy theo dõi giải đấu thất bại",
+        null
+      );
+
+    exist.getFollowingLeagues().remove(league);
+    return new ServiceResult(
+      true,
+      String.format("Hủy theo dõi giải %s", league.getName()),
+      null
+    );
   }
 
   public List<Subscriber> sendMessageTo(List<Subscriber> subscribers, String message) {

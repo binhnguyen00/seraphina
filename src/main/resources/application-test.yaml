@@ -2,7 +2,6 @@ logging:
   level:
     root: INFO
     me.binhnguyen: INFO
-    org.hibernate.tool.schema: DEBUG
 
 server:
   port: 8080

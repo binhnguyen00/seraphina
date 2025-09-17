@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** URL Endpoint <code> /api/v1/league/premier-league </code> */
+/** URL Endpoint <code> /api/v1/league/laliga </code> */
 @RestController
-@RequestMapping(LeagueController.REST_URL + "/premier-league")
-public class PremierLeagueController extends LeagueController {
+@RequestMapping(LeagueController.REST_URL + "/laliga")
+public class LaligaController extends LeagueController {
 
   @Autowired
-  public PremierLeagueController(
+  public LaligaController(
     SeasonService seasonService,
     SubscriberService subscriberService,
     LaligaService laligaService,

@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping(BaseController.REST_URL)
 public class BaseController {
+  /** URL Endpoint <code> /api/v1 </code> */
+  public static final String REST_URL = "/api/v1";
 
   @GetMapping("/health")
   public ResponseEntity<DataRecord> healthCheck() {

@@ -5,6 +5,7 @@ import me.binhnguyen.seraphina.entity.Season;
 import me.binhnguyen.seraphina.service.LaligaService;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
 import me.binhnguyen.seraphina.service.SeasonService;
+import me.binhnguyen.seraphina.service.SubscriberService;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,6 +25,9 @@ public abstract class InitDataTest {
   @Autowired
   public LaligaService laligaService;
 
+  @Autowired
+  public SubscriberService subscriberService;
+
   @BeforeEach
   void setup() {
     initSeason();
@@ -31,6 +35,15 @@ public abstract class InitDataTest {
     initTeams();
     initMatchDays();
     initThisWeekMatchups();
+    initSubscribers();
+  }
+
+  private void initSubscribers() {
+    try {
+      subscriberService.subscribe("306e6075fc20157e4c31", "Binh Nguyen");
+    } catch (Exception e) {
+      log.error("Failed to initialize subscribers", e);
+    }
   }
 
   private void initSeason() {

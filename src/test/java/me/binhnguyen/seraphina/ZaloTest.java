@@ -26,7 +26,7 @@ public class ZaloTest {
 
   @BeforeEach
   void init() {
-    SubscriberService.SubscribeResult result = service.subscribe("306e6075fc20157e4c31", "Binh Nguyen");
+    SubscriberService.ServiceResult result = service.subscribe("306e6075fc20157e4c31", "Binh Nguyen");
     this.chat = result.subscriber();
   }
 

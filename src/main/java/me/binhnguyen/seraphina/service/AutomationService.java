@@ -42,7 +42,7 @@ public class AutomationService {
   }
 
   /**
-   * Auto create/update current week matchups by pull data from ESPN.
+   * Auto create/update current week matchups by pull subscriber from ESPN.
    * Apply to all available leagues.
    * Runs daily at 07:00
    */
