@@ -118,6 +118,10 @@ async def status(update: Update, context):
     return
 
   following: list[str] = data.get("following", [])
+  if (not following):
+    await update.message.reply_text("Bạn chưa theo dõi giải đấu nào. Hãy nhắn \"theo dõi ngoại hạng anh\" hoặc \"theo dõi laliga\"") # type: ignore
+    return
+
   await update.message.reply_text(f"Bạn đang theo dõi: {', '.join(following)}") # type: ignore
 
 
@@ -138,24 +142,24 @@ async def help(update: Update, context):
 Chúng tôi cung cấp thông tin lịch ⚽️ đá bóng hàng tuần của các đội tại giải Ngoại Hạng Anh và Laliga.
 
 Đăng ký nhận thông báo, gửi tin nhắn:
-    đăng ký
+  - đăng ký
 
 Hủy đăng ký nhận thông báo, gửi tin nhắn:
-    hủy đăng ký
+  - hủy đăng ký
 
 Theo dõi/ hủy Ngoại Hạng Anh, gửi tin nhắn:
-    theo dõi ngoại hạng anh
-    hủy theo dõi ngoại hạng anh
+  - theo dõi ngoại hạng anh
+  - hủy theo dõi ngoại hạng anh
 
 Theo dõi/ hủy Laliga, gửi tin nhắn:
-    theo dõi laliga
-    hủy theo dõi laliga
+  - theo dõi laliga
+  - hủy theo dõi laliga
 
 Xem lịch tuần này, gửi tin nhắn:
-    lịch tuần
+  - lịch tuần
 
 Xem trạng thái của bạn, gửi tin nhắn:
-    trạng thái
+  - trạng thái
   """
   await update.message.reply_text(message) # type: ignore
 
