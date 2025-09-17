@@ -39,15 +39,6 @@ public class SubscriberController extends BaseController {
     return ResponseEntity.ok(Response.SUCCESS(result.message(), result.subscriber().getLookupId()));
   }
 
-  @GetMapping("/subscribe/get")
-  public ResponseEntity<Response> getSubscriber(@RequestParam("user_id") String lookupId) {
-    Subscriber subscriber = subscriberService.getSubscriber(lookupId);
-    if (Objects.isNull(subscriber)) {
-      return ResponseEntity.ok(Response.FAIL("Người dùng chưa đăng ký", lookupId));
-    }
-    return ResponseEntity.ok(Response.SUCCESS("Tìm thấy người dùng", lookupId));
-  }
-
   @PostMapping("/unsubscribe")
   public ResponseEntity<Response> unsubscribe(@RequestParam("user_id") String lookupId) {
     boolean success = subscriberService.unsubscribe(lookupId);
@@ -55,5 +46,19 @@ public class SubscriberController extends BaseController {
       return ResponseEntity.ok(Response.FAIL("Hủy đăng ký không thành công", lookupId));
     }
     return ResponseEntity.ok(Response.SUCCESS("Hủy đăng ký thành công", lookupId));
+  }
+
+  @GetMapping("/status")
+  public ResponseEntity<Response> getSubscriberStatus(@RequestParam("user_id") String lookupId) {
+    DataRecord status = DataRecord.spawn();
+    Subscriber subscriber = subscriberService.getSubscriber(lookupId);
+    if (Objects.isNull(subscriber)) {
+      return ResponseEntity.ok(Response.FAIL("Bạn chưa đăng ký"));
+    }
+    status
+      .with("exist", true)
+      .with("name", subscriber.getName())
+      .with("following", subscriber.getFollowingLeagues().stream().map(League::getName).toList());
+    return ResponseEntity.ok(Response.SUCCESS(String.format("Trạng thái người dùng %s", lookupId), status));
   }
 }

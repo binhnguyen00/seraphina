@@ -7,7 +7,6 @@ from typing import Optional;
 logger = logging.getLogger(__name__)
 
 async def subscribe(update: Update, context):
-  logger.info(f"User {update.effective_user.id} subscribe") # type: ignore
   if (not update.effective_user):
     return
 
@@ -16,26 +15,13 @@ async def subscribe(update: Update, context):
   user_id: Optional[str] = update.effective_user.id
   chat_name: Optional[str] = update.effective_user.display_name
 
-  response: requests.Response = requests.get(url="http://app:8080/api/v1/zalo/chat/subscribe/get", params={"user_id": user_id})
-  response_data: dict = response.json()
-  exist: bool = response_data.get("success", False)
-  if (exist): 
-    await update.message.reply_text(f"Tài khoản đã đăng ký trước đó!") # type: ignore
-    return
-
   response = requests.post(url="http://app:8080/api/v1/zalo/chat/subscribe", json={"user_id": user_id, "chat_name": chat_name})
   response_data: dict = response.json()
+  message: str = response_data.get("message", "")
+  await update.message.reply_text(message) # type: ignore
 
-  print(response_data)
-
-  if (not response_data.get("success", False)):
-    await update.message.reply_text(f"Đăng ký thất bại!") # type: ignore
-    return
-
-  await update.message.reply_text(f"Đăng ký thành công!") # type: ignore
 
 async def unsubscribe(update: Update, context):
-  logger.info(f"User {update.effective_user.id} unsubscribe") # type: ignore
   if (not update.effective_user):
     return
 
@@ -44,101 +30,104 @@ async def unsubscribe(update: Update, context):
   target_id: Optional[str] = update.effective_user.id
   response = requests.post(url="http://app:8080/api/v1/zalo/chat/unsubscribe", params={"user_id": target_id})
   response_data: dict = response.json()
+  message: str = response_data.get("message", "")
+  await update.message.reply_text(message) # type: ignore
 
-  if (not response_data.get("success", False)):
-    await update.message.reply_text(f"Hủy đăng ký thất bại!") # type: ignore
-    return
-
-  await update.message.reply_text(f"Hủy đăng ký thành công!") # type: ignore
 
 async def get_schedule(update: Update, context):
-  logger.info(f"User {update.effective_user.id} get schedule") # type: ignore
   if (not update.effective_user):
     return
 
-  response = requests.get(url="http://app:8080/api/v1/premier-league/schedule/matches", params={ "user_id": update.effective_user.id })
+  response = requests.get(url="http://app:8080/api/v1/league/schedule/matches", params={ "user_id": update.effective_user.id })
   response_data: dict = response.json()
-  if (not response_data.get("success", False)):
-    message: str = response_data.get("message", "")
-    await update.message.reply_text(message) # type: ignore
+  success: bool = response_data.get("success", False)
+  server_message: str = response_data.get("message", "")
+
+  if (not success):
+    await update.message.reply_text(server_message) # type: ignore
     return
 
-  matches: str = response_data.get("data", "")
-  await update.message.reply_text(matches) # type: ignore
+  matches_data: str = response_data.get("data", "")
+  message: str = f"{server_message}\n{matches_data}"
+  await update.message.reply_text(message) # type: ignore
+
 
 async def follow_premier_league(update: Update, context):
-  logger.info(f"User {update.effective_user.id} follow premier league") # type: ignore
   if (not update.effective_user):
     return
 
-  response = requests.post(url="http://app:8080/api/v1/premier-league/follow", json={ 
+  response = requests.post(url="http://app:8080/api/v1/league/premier-league/follow", json={ 
     "user_id": update.effective_user.id,
     "league_code": "eng.1"
   })
   response_data: dict = response.json()
-  if (not response_data.get("success", False)):
-    await update.message.reply_text(f"Theo dõi thất bại!") # type: ignore
-    return
-
-  await update.message.reply_text(f"Theo dõi thành công!") # type: ignore
+  message: str = response_data.get("message", "")
+  await update.message.reply_text(message) # type: ignore
 
 async def follow_laliga(update: Update, context):
-  logger.info(f"User {update.effective_user.id} follow laliga") # type: ignore
   if (not update.effective_user):
     return
 
-  response = requests.post(url="http://app:8080/api/v1/laliga/follow", json={ 
+  response = requests.post(url="http://app:8080/api/v1/league/laliga/follow", json={ 
     "user_id": update.effective_user.id,
     "league_code": "esp.1"
   })
   response_data: dict = response.json()
-  if (not response_data.get("success", False)):
-    await update.message.reply_text(f"Theo dõi thất bại!") # type: ignore
-    return
+  message: str = response_data.get("message", "")
+  await update.message.reply_text(message) # type: ignore
 
-  await update.message.reply_text(f"Theo dõi thành công!") # type: ignore
 
 async def unfollow_premier_league(update: Update, context):
-  logger.info(f"User {update.effective_user.id} unfollow premier league") # type: ignore
   if (not update.effective_user):
     return
 
-  response = requests.post(url="http://app:8080/api/v1/premier-league/unfollow", json={ 
+  response = requests.post(url="http://app:8080/api/v1/league/premier-league/unfollow", json={ 
     "user_id": update.effective_user.id,
     "league_code": "eng.1"
   })
   response_data: dict = response.json()
-  if (not response_data.get("success", False)):
-    await update.message.reply_text(f"Hủy theo dõi thất bại!") # type: ignore
-    return
+  message: str = response_data.get("message", "")
+  await update.message.reply_text(message) # type: ignore
 
-  await update.message.reply_text(f"Hủy theo dõi thành công!") # type: ignore
 
 async def unfollow_laliga(update: Update, context):
-  logger.info(f"User {update.effective_user.id} unfollow laliga") # type: ignore
   if (not update.effective_user):
     return
 
-  response = requests.post(url="http://app:8080/api/v1/laliga/unfollow", json={ 
+  response = requests.post(url="http://app:8080/api/v1/league/laliga/unfollow", json={ 
     "user_id": update.effective_user.id,
     "league_code": "esp.1"
   })
   response_data: dict = response.json()
-  if (not response_data.get("success", False)):
-    await update.message.reply_text(f"Hủy theo dõi thất bại!") # type: ignore
+  message: str = response_data.get("message", "")
+  await update.message.reply_text(message) # type: ignore
+
+
+async def status(update: Update, context):
+  if (not update.effective_user):
     return
 
-  await update.message.reply_text(f"Hủy theo dõi thành công!") # type: ignore
+  response = requests.get(url="http://app:8080/api/v1/zalo/chat/status", params={ "user_id": update.effective_user.id })
+  response_data: dict = response.json()
+  success: bool = response_data.get("success", False)
+  server_message: str = response_data.get("message", "")
+  data: dict = response_data.get("data", "")
+
+  if (not success):
+    await update.message.reply_text(server_message) # type: ignore
+    return
+
+  following: list[str] = data.get("following", [])
+  await update.message.reply_text(f"Bạn đang theo dõi: {', '.join(following)}") # type: ignore
+
 
 async def health_check(update: Update, context):
   logger.info(f"User {update.effective_user.id} is checking api health") # type: ignore
   response = requests.get(url="http://app:8080/api/v1/zalo/chat/health")
   response_data: dict = response.json()
-  if (not response_data.get("success", False)):
-    await update.message.reply_text(f"Server is not ready!") # type: ignore
-    return
+  message: str = response_data.get("message", "")
+  await update.message.reply_text(message) # type: ignore
 
-  await update.message.reply_text(f"API is healthy!") # type: ignore
 
 async def help(update: Update, context):
   if (not update.effective_user):
@@ -164,5 +153,15 @@ Theo dõi/ hủy Laliga, gửi tin nhắn:
 
 Xem lịch tuần này, gửi tin nhắn:
     lịch tuần
+
+Xem trạng thái của bạn, gửi tin nhắn:
+    trạng thái
   """
+  await update.message.reply_text(message) # type: ignore
+
+async def unknown_command(update: Update, context):
+  if (not update.effective_user):
+    return
+
+  message: str = f"""🤷‍♂️ Lệnh của bạn chưa đúng! Hãy nhắn "hướng dẫn" để xem các lệnh có thể sử dụng"""
   await update.message.reply_text(message) # type: ignore

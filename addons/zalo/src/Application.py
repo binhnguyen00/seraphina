@@ -15,7 +15,7 @@ from EventCallBacks import (
   get_schedule, 
   follow_premier_league, follow_laliga, 
   unfollow_premier_league, unfollow_laliga,
-  help, health_check
+  help, health_check, status, unknown_command
 )
 
 app = Flask(__name__)
@@ -64,7 +64,15 @@ with app.app_context():
     lambda update: bool(update.message and update.message.text and update.message.text.lower().strip() == "hủy theo dõi laliga")
   ), unfollow_laliga)) # type: ignore
 
-  dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, help)) # type: ignore
+  dispatcher.add_handler(MessageHandler(filters.BaseFilter(
+    lambda update: bool(update.message and update.message.text and update.message.text.lower().strip() == "trạng thái")
+  ), status)) # type: ignore
+
+  dispatcher.add_handler(MessageHandler(filters.BaseFilter(
+    lambda update: bool(update.message and update.message.text and update.message.text.lower().strip() == "hướng dẫn")
+  ), help)) # type: ignore
+
+  dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, unknown_command)) # type: ignore
 
 @app.route('/webhook', methods=['POST'])
 def webhook():

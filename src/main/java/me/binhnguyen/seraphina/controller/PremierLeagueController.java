@@ -1,5 +1,6 @@
 package me.binhnguyen.seraphina.controller;
 
+import me.binhnguyen.seraphina.common.DataRecord;
 import me.binhnguyen.seraphina.common.Response;
 import me.binhnguyen.seraphina.service.LaligaService;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
@@ -8,8 +9,8 @@ import me.binhnguyen.seraphina.service.SubscriberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** URL Endpoint <code> /api/v1/league/premier-league </code> */
@@ -28,10 +29,10 @@ public class PremierLeagueController extends LeagueController {
   }
 
   @PostMapping("/follow")
-  public ResponseEntity<Response> followLeague(
-    @RequestParam("user_id") String lookupId,
-    @RequestParam("league_code") String leagueCode
-  ) {
+  public ResponseEntity<Response> followLeague(@RequestBody DataRecord request) {
+    String lookupId = String.valueOf(request.get("user_id"));
+    String leagueCode = String.valueOf(request.get("league_code"));
+
     SubscriberService.ServiceResult result = subscriberService.followLeague(lookupId, leagueCode);
     if (!result.success()) {
       return ResponseEntity.ok(Response.FAIL(result.message()));
@@ -39,11 +40,11 @@ public class PremierLeagueController extends LeagueController {
     return ResponseEntity.ok(Response.SUCCESS(result.message()));
   }
 
-  @PostMapping("unfollow")
-  public ResponseEntity<Response> unfollowLeague(
-    @RequestParam("user_id") String lookupId,
-    @RequestParam("league_code") String leagueCode
-  ) {
+  @PostMapping("/unfollow")
+  public ResponseEntity<Response> unfollowLeague(@RequestBody DataRecord request) {
+    String lookupId = String.valueOf(request.get("user_id"));
+    String leagueCode = String.valueOf(request.get("league_code"));
+
     SubscriberService.ServiceResult result = subscriberService.unfollowLeague(lookupId, leagueCode);
     if (!result.success()) {
       return ResponseEntity.ok(Response.FAIL(result.message()));

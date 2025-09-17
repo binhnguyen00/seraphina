@@ -41,6 +41,10 @@ public class LeagueController extends BaseController {
     }
 
     List<League> following = exist.getFollowingLeagues().stream().toList();
+    if (following.isEmpty()) {
+      return ResponseEntity.ok(Response.FAIL("Bạn chưa theo dõi giải đấu nào"));
+    }
+
     List<Matchup> matchups = new ArrayList<>();
     for (League league : following) {
       switch (league.getCode()) {
@@ -61,7 +65,7 @@ public class LeagueController extends BaseController {
       %s vs %s
       %s
       Sân %s
-      
+
       """,
         i + 1,
         match.getHomeTeam().getName(),
