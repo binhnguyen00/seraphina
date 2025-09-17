@@ -7,11 +7,13 @@ import me.binhnguyen.seraphina.utils.MessageTemplate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
 @Slf4j
 @SpringBootTest
+@ActiveProfiles("test")
 class LeagueTest extends InitDataTest {
 
   // ==========================================

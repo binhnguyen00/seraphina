@@ -8,10 +8,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
 @SpringBootTest
+@ActiveProfiles("test")
 public class ZaloTest {
 
   @Autowired
@@ -24,7 +26,8 @@ public class ZaloTest {
 
   @BeforeEach
   void init() {
-    this.chat = service.subscribe("306e6075fc20157e4c31", "Binh Nguyen");
+    SubscriberService.SubscribeResult result = service.subscribe("306e6075fc20157e4c31", "Binh Nguyen");
+    this.chat = result.subscriber();
   }
 
   @Test
