@@ -162,36 +162,55 @@ async def health_check(update: Update, context):
 async def help(update: Update, context):
   if (not update.effective_user):
     return
-  
-  message: str = f"""👋 Xin chào {update.effective_user.display_name}!
 
-Chúng tôi cung cấp thông tin lịch ⚽️ đá bóng hàng tuần của các đội tại giải Ngoại Hạng Anh và Laliga.
+  message: str = f"👋 Xin chào {update.effective_user.display_name}!"
+  await update.message.reply_text(message) # type: ignore
 
+  message = "Chúng tôi cung cấp thông tin lịch ⚽️ đá bóng hàng tuần của các đội tại giải Ngoại Hạng Anh, Laliga và Champions League."
+  await update.message.reply_text(message) # type: ignore
+
+  message = """
 Đăng ký nhận thông báo, gửi tin nhắn:
   - đăng ký
 
 Hủy đăng ký nhận thông báo, gửi tin nhắn:
   - hủy đăng ký
+  """.strip()
+  await update.message.reply_text(message) # type: ignore
 
-Theo dõi/ hủy Ngoại Hạng Anh, gửi tin nhắn:
+  message = """
+Theo dõi/ hủy Ngoại Hạng Anh 🏆, gửi tin nhắn:
   - theo dõi ngoại hạng anh
   - hủy theo dõi ngoại hạng anh
+""".strip()
+  await update.message.reply_text(message) # type: ignore
 
-Theo dõi/ hủy Laliga, gửi tin nhắn:
+  message = """
+Theo dõi/ hủy Laliga 🏆, gửi tin nhắn:
   - theo dõi laliga
   - hủy theo dõi laliga
+""".strip()
+  await update.message.reply_text(message) # type: ignore
 
-Theo dõi/ hủy C1, gửi tin nhắn:
+  message = """
+Theo dõi/ hủy Champions League 👑, gửi tin nhắn:
   - theo dõi c1
   - hủy theo dõi c1
+""".strip()
+  await update.message.reply_text(message) # type: ignore
 
+  message = """
 Xem lịch tuần này, gửi tin nhắn:
   - lịch tuần
+  """.strip()
+  await update.message.reply_text(message) # type: ignore
 
+  message = """
 Xem trạng thái của bạn, gửi tin nhắn:
   - trạng thái
-  """
+""".strip()
   await update.message.reply_text(message) # type: ignore
+
 
 async def unknown_command(update: Update, context):
   if (not update.effective_user):
