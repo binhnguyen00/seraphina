@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** URL Endpoint <code> /api/v1/league/laliga </code> */
+/** URL Endpoint <code> /api/v1/league/champion-league </code> */
 @RestController
-@RequestMapping(LeagueController.REST_URL + "/laliga")
-public class LaligaController extends LeagueController {
+@RequestMapping(LeagueController.REST_URL + "/champion-league")
+public class ChampionLeagueController extends LeagueController {
 
   @Autowired
-  public LaligaController(
+  public ChampionLeagueController(
     SeasonService seasonService,
     SubscriberService subscriberService,
     LaligaService laligaService,
@@ -31,7 +31,7 @@ public class LaligaController extends LeagueController {
   @PostMapping("/follow")
   public ResponseEntity<Response> followLeague(@RequestBody DataRecord request) {
     String lookupId = String.valueOf(request.get("user_id"));
-    String leagueCode = String.valueOf(request.getOrDefault("league_code", "esp.1"));
+    String leagueCode = String.valueOf(request.getOrDefault("league_code", "uefa.champion"));
 
     SubscriberService.ServiceResult result = subscriberService.followLeague(lookupId, leagueCode);
     if (!result.success()) {
@@ -40,10 +40,10 @@ public class LaligaController extends LeagueController {
     return ResponseEntity.ok(Response.SUCCESS(result.message()));
   }
 
-  @PostMapping("unfollow")
+  @PostMapping("/unfollow")
   public ResponseEntity<Response> unfollowLeague(@RequestBody DataRecord request) {
     String lookupId = String.valueOf(request.get("user_id"));
-    String leagueCode = String.valueOf(request.getOrDefault("league_code", "esp.1"));
+    String leagueCode = String.valueOf(request.getOrDefault("league_code", "uefa.champion"));
 
     SubscriberService.ServiceResult result = subscriberService.unfollowLeague(lookupId, leagueCode);
     if (!result.success()) {

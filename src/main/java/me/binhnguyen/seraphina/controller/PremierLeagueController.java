@@ -31,7 +31,7 @@ public class PremierLeagueController extends LeagueController {
   @PostMapping("/follow")
   public ResponseEntity<Response> followLeague(@RequestBody DataRecord request) {
     String lookupId = String.valueOf(request.get("user_id"));
-    String leagueCode = String.valueOf(request.get("league_code"));
+    String leagueCode = String.valueOf(request.getOrDefault("league_code", "eng.1"));
 
     SubscriberService.ServiceResult result = subscriberService.followLeague(lookupId, leagueCode);
     if (!result.success()) {
@@ -43,7 +43,7 @@ public class PremierLeagueController extends LeagueController {
   @PostMapping("/unfollow")
   public ResponseEntity<Response> unfollowLeague(@RequestBody DataRecord request) {
     String lookupId = String.valueOf(request.get("user_id"));
-    String leagueCode = String.valueOf(request.get("league_code"));
+    String leagueCode = String.valueOf(request.getOrDefault("league_code", "eng.1"));
 
     SubscriberService.ServiceResult result = subscriberService.unfollowLeague(lookupId, leagueCode);
     if (!result.success()) {

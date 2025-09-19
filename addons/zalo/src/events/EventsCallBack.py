@@ -181,6 +181,10 @@ Theo dõi/ hủy Laliga, gửi tin nhắn:
   - theo dõi laliga
   - hủy theo dõi laliga
 
+Theo dõi/ hủy C1, gửi tin nhắn:
+  - theo dõi c1
+  - hủy theo dõi c1
+
 Xem lịch tuần này, gửi tin nhắn:
   - lịch tuần
 
