@@ -91,10 +91,13 @@ public class DevelopmentDataInit {
   private void initMatchDays() {
     try {
       premierLeagueService.createOrUpdateAllMatchDays();
-      laligaService.createOrUpdateAllMatchDays();
-      championLeagueService.createOrUpdateAllMatchDays();
     } catch (Exception e) {
-      log.error("Failed to initialize match days", e);
+      log.error("Failed to initialize Premier League match days", e);
+    }
+    try {
+      laligaService.createOrUpdateAllMatchDays();
+    } catch (Exception e) {
+      log.error("Failed to initialize Laliga match days", e);
     }
   }
 

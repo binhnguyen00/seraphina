@@ -22,6 +22,7 @@ public class SubscriberService {
   private final SubscriberRepo repo;
   private final LaligaService laligaService;
   private final PremierLeagueService premierLeagueService;
+  private final ChampionLeagueService championLeagueService;
 
   public record ServiceResult(boolean success, String message, Subscriber subscriber) {}
 
@@ -29,12 +30,14 @@ public class SubscriberService {
     @Qualifier("microServiceZalo") WebClient webClient,
     SubscriberRepo repo,
     LaligaService laligaService,
-    PremierLeagueService premierLeagueService
+    PremierLeagueService premierLeagueService,
+    ChampionLeagueService championLeagueService
   ) {
     this.webClient = webClient;
     this.repo = repo;
     this.laligaService = laligaService;
     this.premierLeagueService = premierLeagueService;
+    this.championLeagueService = championLeagueService;
   }
 
   @Transactional
@@ -110,6 +113,7 @@ public class SubscriberService {
     League league = switch (leagueCode) {
       case "eng.1" -> premierLeagueService.get();
       case "esp.1" -> laligaService.get();
+      case "uefa.champions" -> championLeagueService.get();
       default -> null;
     };
     if (Objects.isNull(league))
@@ -150,6 +154,7 @@ public class SubscriberService {
     League league = switch (leagueCode) {
       case "eng.1" -> premierLeagueService.get();
       case "esp.1" -> laligaService.get();
+      case "uefa.champions" -> championLeagueService.get();
       default -> null;
     };
     if (Objects.isNull(league))

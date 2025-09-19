@@ -13,8 +13,8 @@ import java.util.List;
 public interface MatchupRepo extends JpaRepository<Matchup, Persistence> {
   Matchup getByCode(String code);
 
-  @Query("SELECT m FROM Matchup m WHERE m.matchDay BETWEEN :from AND :to ORDER BY m.matchDay ASC")
-  List<Matchup> getByMatchDayBetween(OffsetDateTime from, OffsetDateTime to);
+  @Query("SELECT m FROM Matchup m WHERE m.matchDay BETWEEN :from AND :to AND m.league.code = :leaguecode ORDER BY m.matchDay ASC")
+  List<Matchup> getByMatchDayBetween(OffsetDateTime from, OffsetDateTime to, String leaguecode);
 
   @Query("""
     SELECT m FROM Matchup m

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.Team;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -31,7 +32,7 @@ public class CrawlerService {
         .queryParam("dates", dates)
         .build(leagueCode))
       .retrieve()
-      .bodyToMono(Map.class)
+      .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
       .timeout(Duration.ofSeconds(20))
       .block();
 
@@ -83,12 +84,13 @@ public class CrawlerService {
     return matchesHolder;
   }
 
+  /** Get current season schedule match days */
   @SuppressWarnings("unchecked")
   public List<LocalDate> pullCurrentSeasonScheduleMatchDays(String leagueCode) {
     Map<String, Object> response = this.webClient.get()
       .uri("/{leagueId}/scoreboard", leagueCode)
       .retrieve()
-      .bodyToMono(Map.class)
+      .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
       .timeout(Duration.ofSeconds(10))
       .block();
 
@@ -121,7 +123,7 @@ public class CrawlerService {
     Map<String, Object> response = this.webClient.get()
       .uri("/{leagueId}/teams", leagueCode)
       .retrieve()
-      .bodyToMono(Map.class)
+      .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
       .timeout(Duration.ofSeconds(10))
       .block();
     if (Objects.isNull(response)) {

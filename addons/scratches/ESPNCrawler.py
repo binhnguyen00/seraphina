@@ -8,7 +8,7 @@ from datetime import datetime, timedelta;
 class ESPNPremierLeagueCrawler():
   def __init__(self):
     self.base_url = "https://site.api.espn.com/apis/site/v2/sports/soccer"
-    self.league_id = "eng.1"  # Premier League
+    self.league_id = "uefa.champions"
 
   def get_schedule(self, date: Optional[str] = None):
     print(date)
@@ -23,9 +23,6 @@ class ESPNPremierLeagueCrawler():
 
     response: Response = requests.get(url=url, params=params)
     response_data: dict = response.json()
-
-    print(response_data)
-
     events: list[dict] = response_data.get("events", [])
 
     for event in events:
@@ -54,7 +51,7 @@ class ESPNPremierLeagueCrawler():
       team: dict = team_data.get("team", {})
       team_info.append({
         "id": team.get("id"),
-        "name": team.get("displayName"),                           
+        "name": team.get("displayName"),
         "abbreviation": team.get("abbreviation"),
       })
 
@@ -62,6 +59,6 @@ class ESPNPremierLeagueCrawler():
 
 if __name__ == "__main__":
   crawler = ESPNPremierLeagueCrawler()
-  # today_matches = crawler.get_schedule("20250913")
-  teams = crawler.get_all_teams()
-  print(json.dumps(teams, indent=2))
+  today_matches = crawler.get_schedule("20250913")
+  # teams = crawler.get_all_teams()
+  print(json.dumps(today_matches, indent=2))

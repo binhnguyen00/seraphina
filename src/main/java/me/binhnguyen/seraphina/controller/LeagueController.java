@@ -6,10 +6,7 @@ import me.binhnguyen.seraphina.common.Response;
 import me.binhnguyen.seraphina.entity.League;
 import me.binhnguyen.seraphina.entity.Matchup;
 import me.binhnguyen.seraphina.entity.Subscriber;
-import me.binhnguyen.seraphina.service.LaligaService;
-import me.binhnguyen.seraphina.service.PremierLeagueService;
-import me.binhnguyen.seraphina.service.SeasonService;
-import me.binhnguyen.seraphina.service.SubscriberService;
+import me.binhnguyen.seraphina.service.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +29,7 @@ public class LeagueController extends BaseController {
   protected final SubscriberService subscriberService;
   protected final LaligaService laligaService;
   protected final PremierLeagueService premierLeagueService;
+  protected final ChampionLeagueService championLeagueService;
 
   @GetMapping("/schedule/matches")
   public ResponseEntity<Response> getScheduleMatches(@RequestParam("user_id") String lookupId) {
@@ -50,6 +48,7 @@ public class LeagueController extends BaseController {
       switch (league.getCode()) {
         case "eng.1" -> matchups.addAll(premierLeagueService.getCurrentWeekMatches());
         case "esp.1" -> matchups.addAll(laligaService.getCurrentWeekMatches());
+        case "uefa.champions" -> matchups.addAll(championLeagueService.getCurrentWeekMatches());
         default -> log.warn("League {} is not supported", league.getCode());
       }
     }

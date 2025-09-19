@@ -2,10 +2,7 @@ package me.binhnguyen.seraphina.controller;
 
 import me.binhnguyen.seraphina.common.DataRecord;
 import me.binhnguyen.seraphina.common.Response;
-import me.binhnguyen.seraphina.service.LaligaService;
-import me.binhnguyen.seraphina.service.PremierLeagueService;
-import me.binhnguyen.seraphina.service.SeasonService;
-import me.binhnguyen.seraphina.service.SubscriberService;
+import me.binhnguyen.seraphina.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,15 +20,16 @@ public class ChampionLeagueController extends LeagueController {
     SeasonService seasonService,
     SubscriberService subscriberService,
     LaligaService laligaService,
-    PremierLeagueService premierLeagueService
+    PremierLeagueService premierLeagueService,
+    ChampionLeagueService championLeagueService
   ) {
-    super(seasonService, subscriberService, laligaService, premierLeagueService);
+    super(seasonService, subscriberService, laligaService, premierLeagueService, championLeagueService);
   }
 
   @PostMapping("/follow")
   public ResponseEntity<Response> followLeague(@RequestBody DataRecord request) {
     String lookupId = String.valueOf(request.get("user_id"));
-    String leagueCode = String.valueOf(request.getOrDefault("league_code", "uefa.champion"));
+    String leagueCode = String.valueOf(request.getOrDefault("league_code", "uefa.champions"));
 
     SubscriberService.ServiceResult result = subscriberService.followLeague(lookupId, leagueCode);
     if (!result.success()) {
@@ -43,7 +41,7 @@ public class ChampionLeagueController extends LeagueController {
   @PostMapping("/unfollow")
   public ResponseEntity<Response> unfollowLeague(@RequestBody DataRecord request) {
     String lookupId = String.valueOf(request.get("user_id"));
-    String leagueCode = String.valueOf(request.getOrDefault("league_code", "uefa.champion"));
+    String leagueCode = String.valueOf(request.getOrDefault("league_code", "uefa.champions"));
 
     SubscriberService.ServiceResult result = subscriberService.unfollowLeague(lookupId, leagueCode);
     if (!result.success()) {

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.League;
 import me.binhnguyen.seraphina.entity.Season;
+import me.binhnguyen.seraphina.service.ChampionLeagueService;
 import me.binhnguyen.seraphina.service.LaligaService;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
 import me.binhnguyen.seraphina.service.SeasonService;
@@ -24,6 +25,7 @@ public class ProductionDataInit {
   private final SeasonService seasonService;
   private final LaligaService laligaService;
   private final PremierLeagueService premierLeagueService;
+  private final ChampionLeagueService championLeagueService;
 
   @PostConstruct
   public void init() {
@@ -59,6 +61,13 @@ public class ProductionDataInit {
     } catch (Exception e) {
       log.error("Failed to initialize Laliga", e);
     }
+    try {
+      League league_3 = championLeagueService.get();
+      if (Objects.isNull(league_3))
+        championLeagueService.create();
+    } catch (Exception e) {
+      log.error("Failed to initialize Champion League", e);
+    }
   }
 
   private void initTeams() {
@@ -72,18 +81,23 @@ public class ProductionDataInit {
     } catch (Exception e) {
       log.error("Failed to initialize Laliga teams", e);
     }
+    try {
+      championLeagueService.createOrUpdateTeams();
+    } catch (Exception e) {
+      log.error("Failed to initialize Champion League teams", e);
+    }
   }
 
   private void initMatchDays() {
     try {
       premierLeagueService.createOrUpdateAllMatchDays();
     } catch (Exception e) {
-      log.error("Failed to initialize match days", e);
+      log.error("Failed to initialize Premier League match days", e);
     }
     try {
       laligaService.createOrUpdateAllMatchDays();
     } catch (Exception e) {
-      log.error("Failed to initialize match days", e);
+      log.error("Failed to initialize Laliga match days", e);
     }
   }
 
@@ -94,6 +108,7 @@ public class ProductionDataInit {
     try {
       premierLeagueService.createOrUpdateMatchups(THIS_MONDAY, THIS_SUNDAY);
       laligaService.createOrUpdateMatchups(THIS_MONDAY, THIS_SUNDAY);
+      championLeagueService.createOrUpdateMatchups(THIS_MONDAY, THIS_SUNDAY);
     } catch (Exception e) {
       log.error("Failed to initialize this week matchups", e);
     }

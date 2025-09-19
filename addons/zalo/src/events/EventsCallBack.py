@@ -109,7 +109,7 @@ async def follow_champion_league(update: Update, context):
 
   response = requests.post(url="http://app:8080/api/v1/league/champion-league/follow", json={ 
     "user_id": update.effective_user.id,
-    "league_code": "uefa.champion"
+    "league_code": "uefa.champions"
   })
   response_data: dict = response.json()
   message: str = response_data.get("message", "")
@@ -122,7 +122,7 @@ async def unfollow_champion_league(update: Update, context):
 
   response = requests.post(url="http://app:8080/api/v1/league/champion-league/unfollow", json={ 
     "user_id": update.effective_user.id,
-    "league_code": "uefa.champion"
+    "league_code": "uefa.champions"
   })
   response_data: dict = response.json()
   message: str = response_data.get("message", "")
