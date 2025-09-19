@@ -27,4 +27,6 @@ COPY --from=builder /zalo /zalo
 COPY --from=builder /install /usr/local
 COPY src src
 
-CMD ["python", "src/Application.py"]
+ENV PORT=${MICROSERVICE_ZALO_PORT}
+EXPOSE ${PORT}
+CMD ["sh", "-c", "uvicorn src.Application:app --host 0.0.0.0 --port $MICROSERVICE_ZALO_PORT"]

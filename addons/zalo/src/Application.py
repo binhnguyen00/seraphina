@@ -1,3 +1,4 @@
+import asyncio
 import os;
 import secrets;
 
@@ -9,8 +10,8 @@ from zalo_bot.ext import Dispatcher, CommandHandler, MessageHandler, filters;
 
 load_dotenv()
 
-from Dto import Request, Response;
-from EventCallBacks import (
+from .Dto import Request, Response;
+from .EventCallBacks import (
   subscribe, unsubscribe, 
   get_schedule, 
   follow_premier_league, follow_laliga, 
@@ -30,10 +31,12 @@ with app.app_context():
     raise ValueError("MICROSERVICE_ZALO_WEBHOOK_URL is not set")
 
   bot = Bot(token=BOT_TOKEN)
-  bot.set_webhook(url=WEBHOOK_URL, secret_token=WEBHOOK_SECRET_TOKEN)
+  async def setup_webhook():
+    await bot._set_webhook_async(WEBHOOK_URL, WEBHOOK_SECRET_TOKEN) # type: ignore
+  asyncio.get_event_loop().create_task(setup_webhook())
 
+  # Events handler
   dispatcher = Dispatcher(bot, None, workers=0)
-
   dispatcher.add_handler(CommandHandler("health", health_check))
 
   dispatcher.add_handler(MessageHandler(filters.BaseFilter(
