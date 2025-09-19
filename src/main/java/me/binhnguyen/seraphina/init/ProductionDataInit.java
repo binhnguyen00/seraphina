@@ -3,20 +3,24 @@ package me.binhnguyen.seraphina.init;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.binhnguyen.seraphina.repository.LeagueRepo;
+import me.binhnguyen.seraphina.entity.League;
+import me.binhnguyen.seraphina.entity.Season;
 import me.binhnguyen.seraphina.service.LaligaService;
 import me.binhnguyen.seraphina.service.PremierLeagueService;
 import me.binhnguyen.seraphina.service.SeasonService;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Objects;
 
 @Slf4j
-// @Component
+@Component
+@Profile("prod")
 @RequiredArgsConstructor
 public class ProductionDataInit {
-  private final LeagueRepo leagueRepo;
   private final SeasonService seasonService;
   private final LaligaService laligaService;
   private final PremierLeagueService premierLeagueService;
@@ -24,7 +28,7 @@ public class ProductionDataInit {
   @PostConstruct
   public void init() {
     initSeason();
-    initLeague();
+    initLeagues();
     initTeams();
     initMatchDays();
     initThisWeekMatchups();
@@ -32,33 +36,51 @@ public class ProductionDataInit {
 
   private void initSeason() {
     try {
-      seasonService.createSeason();
+      Season season = seasonService.getCurrentSeason();
+      if (Objects.isNull(season))
+        seasonService.createSeason();
     } catch (Exception e) {
       log.error("Failed to initialize seasons", e);
     }
   }
 
-  private void initLeague() {
+  private void initLeagues() {
     try {
-      premierLeagueService.create();
-      laligaService.create();
+      League league_1 = premierLeagueService.get();
+      if (Objects.isNull(league_1))
+        premierLeagueService.create();
     } catch (Exception e) {
-      log.error("Failed to initialize leagues", e);
+      log.error("Failed to initialize Premier League", e);
+    }
+    try {
+      League league_2 = laligaService.get();
+      if (Objects.isNull(league_2))
+        laligaService.create();
+    } catch (Exception e) {
+      log.error("Failed to initialize Laliga", e);
     }
   }
 
   private void initTeams() {
     try {
       premierLeagueService.createOrUpdateTeams();
+    } catch (Exception e) {
+      log.error("Failed to initialize Premier League teams", e);
+    }
+    try {
       laligaService.createOrUpdateTeams();
     } catch (Exception e) {
-      log.error("Failed to initialize teams", e);
+      log.error("Failed to initialize Laliga teams", e);
     }
   }
 
   private void initMatchDays() {
     try {
       premierLeagueService.createOrUpdateAllMatchDays();
+    } catch (Exception e) {
+      log.error("Failed to initialize match days", e);
+    }
+    try {
       laligaService.createOrUpdateAllMatchDays();
     } catch (Exception e) {
       log.error("Failed to initialize match days", e);
