@@ -103,6 +103,32 @@ async def unfollow_laliga(update: Update, context):
   await update.message.reply_text(message) # type: ignore
 
 
+async def follow_champion_league(update: Update, context):
+  if (not update.effective_user):
+    return
+
+  response = requests.post(url="http://app:8080/api/v1/league/champion-league/follow", json={ 
+    "user_id": update.effective_user.id,
+    "league_code": "uefa.champion"
+  })
+  response_data: dict = response.json()
+  message: str = response_data.get("message", "")
+  await update.message.reply_text(message) # type: ignore
+
+
+async def unfollow_champion_league(update: Update, context):
+  if (not update.effective_user):
+    return
+
+  response = requests.post(url="http://app:8080/api/v1/league/champion-league/unfollow", json={ 
+    "user_id": update.effective_user.id,
+    "league_code": "uefa.champion"
+  })
+  response_data: dict = response.json()
+  message: str = response_data.get("message", "")
+  await update.message.reply_text(message) # type: ignore
+
+
 async def status(update: Update, context):
   if (not update.effective_user):
     return
