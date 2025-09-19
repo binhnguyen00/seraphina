@@ -2,7 +2,9 @@ package me.binhnguyen.seraphina.service;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import me.binhnguyen.seraphina.common.DataRecord;
 import me.binhnguyen.seraphina.entity.League;
+import me.binhnguyen.seraphina.entity.Matchup;
 import me.binhnguyen.seraphina.entity.Subscriber;
 import me.binhnguyen.seraphina.repository.SubscriberRepo;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -10,10 +12,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.time.LocalDate;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -172,38 +172,55 @@ public class SubscriberService {
     );
   }
 
-  public List<Subscriber> sendMessageTo(List<Subscriber> subscribers, String message) {
-    List<Subscriber> failHolder = new ArrayList<>();
-    List<Subscriber> successHolder = new ArrayList<>();
+  public boolean sendMessageTo(Subscriber subscriber, List<DataRecord> leagues) {
+    Map<String, Object> response = this.webClient.post()
+      .uri(uriBuilder -> uriBuilder
+        .path("/send-message")
+        .queryParam("user_id", subscriber.getLookupId())
+        .queryParam("leagues", leagues)
+        .build())
+      .retrieve()
+      .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+      .block();
 
-    for (Subscriber subscriber : subscribers) {
-      Map<String, Object> response = this.webClient.post()
-        .uri(uriBuilder -> uriBuilder
-          .path("/send-message")
-          .queryParam("user_id", subscriber.getLookupId())
-          .queryParam("message", message)
-          .build())
-        .retrieve()
-        .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-        .block();
-
-      if (Objects.isNull(response)) {
-        log.error("sendMessageTo API has no response");
-        failHolder.add(subscriber);
-        continue;
-      }
-
-      boolean success = Boolean.TRUE.equals(response.get("success"));
-      if (success) {
-        successHolder.add(subscriber);
-      } else {
-        failHolder.add(subscriber);
-      }
+    if (Objects.isNull(response)) {
+      log.error("sendMessageTo API has no response");
+      return false;
     }
 
-    successHolder.forEach(success -> log.info("Sent message to chat {}, {}", success.getLookupId(), success.getName()));
-    failHolder.forEach(fail -> log.error("Failed to send message to chat {}, {}", fail.getLookupId(), fail.getName()));
+    boolean success = Boolean.TRUE.equals(response.get("success"));
+    return !success;
+  }
 
-    return successHolder;
+  /**
+   * Retrieves the list of leagues and their upcoming matches that the subscriber is following.
+   * The matches are filtered to show only those scheduled for the next day.
+   *
+   * @param subscriber The subscriber whose followed leagues and matches to retrieve
+   * @return A list of DataRecord objects, where each record represents a league and contains: <br/>
+   *         <code>league</code>: League name <br/>
+   *         <code>matches</code>: List of Matchup objects for the next day's matches in that league <br/>
+   *         Returns an empty list if the subscriber is not following any leagues.
+   */
+  public List<DataRecord> getLeagues(Subscriber subscriber, LocalDate from, LocalDate to) {
+    if (subscriber.getFollowingLeagues().isEmpty())
+      return Collections.emptyList();
+
+    List<DataRecord> leagues = new ArrayList<>();
+    for (League league : subscriber.getFollowingLeagues()) {
+      List<Matchup> matchups = switch (league.getCode()) {
+        case "eng.1" -> premierLeagueService.getMatchesByDateRange(from, to);
+        case "esp.1" -> laligaService.getMatchesByDateRange(from, to);
+        case "uefa.champions" -> championLeagueService.getMatchesByDateRange(from, to);
+        default -> Collections.emptyList();
+      };
+      if (matchups.isEmpty()) continue;
+      leagues.add(DataRecord.spawn()
+        .with("name", league.getName())
+        .with("matches", matchups.stream().map(Matchup::toDataRecord).toList())
+      );
+    }
+
+    return leagues;
   }
 }

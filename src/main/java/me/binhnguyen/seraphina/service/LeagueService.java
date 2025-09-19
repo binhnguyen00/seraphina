@@ -9,10 +9,7 @@ import me.binhnguyen.seraphina.repository.MatchDayRepo;
 import me.binhnguyen.seraphina.repository.MatchupRepo;
 import me.binhnguyen.seraphina.repository.TeamRepo;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
@@ -34,6 +31,12 @@ public abstract class LeagueService {
   public League get() {
     final String LEAGUE_CODE = this.getCode();
     return leagueRepo.getByCode(LEAGUE_CODE);
+  }
+
+  public List<Matchup> getMatchesByDateRange(LocalDate from, LocalDate to) {
+    OffsetDateTime start = from.atStartOfDay().atOffset(ZoneOffset.UTC);
+    OffsetDateTime end = to.atTime(LocalTime.MAX).atOffset(ZoneOffset.UTC);
+    return matchupRepo.getByMatchDayBetween(start, end, this.getCode());
   }
 
   public List<MatchDay> getThisWeekMatchDays() {

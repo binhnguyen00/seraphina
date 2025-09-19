@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import me.binhnguyen.seraphina.common.BaseEntity;
+import me.binhnguyen.seraphina.common.DataRecord;
 import me.binhnguyen.seraphina.common.DatePattern;
 
 import java.time.LocalDateTime;
@@ -86,5 +87,13 @@ public class Matchup extends BaseEntity {
     return input.toLowerCase()
       .replaceAll("\\s+", "_")
       .replaceAll("[^a-z0-9_]", "");
+  }
+
+  public DataRecord toDataRecord() {
+    return DataRecord.spawn()
+      .with("home", this.homeTeam.getName())
+      .with("away", this.awayTeam.getName())
+      .with("stadium", this.homeStadium)
+      .with("matchDay", this.getFormatMatchDay());
   }
 }

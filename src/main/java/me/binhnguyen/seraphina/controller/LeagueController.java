@@ -2,9 +2,9 @@ package me.binhnguyen.seraphina.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.binhnguyen.seraphina.common.DataRecord;
 import me.binhnguyen.seraphina.common.Response;
 import me.binhnguyen.seraphina.entity.League;
-import me.binhnguyen.seraphina.entity.Matchup;
 import me.binhnguyen.seraphina.entity.Subscriber;
 import me.binhnguyen.seraphina.service.*;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,6 +32,7 @@ public class LeagueController extends BaseController {
   protected final PremierLeagueService premierLeagueService;
   protected final ChampionLeagueService championLeagueService;
 
+  /** Get current week's matches */
   @GetMapping("/schedule/matches")
   public ResponseEntity<Response> getScheduleMatches(@RequestParam("user_id") String lookupId) {
     Subscriber exist = subscriberService.getSubscriber(lookupId);
@@ -43,39 +45,16 @@ public class LeagueController extends BaseController {
       return ResponseEntity.ok(Response.FAIL("Bạn chưa theo dõi giải đấu nào"));
     }
 
-    List<Matchup> matchups = new ArrayList<>();
-    for (League league : following) {
-      switch (league.getCode()) {
-        case "eng.1" -> matchups.addAll(premierLeagueService.getCurrentWeekMatches());
-        case "esp.1" -> matchups.addAll(laligaService.getCurrentWeekMatches());
-        case "uefa.champions" -> matchups.addAll(championLeagueService.getCurrentWeekMatches());
-        default -> log.warn("League {} is not supported", league.getCode());
-      }
-    }
-    if (matchups.isEmpty()) {
-      return ResponseEntity.ok(Response.FAIL("Tuần này chưa có lịch thi đấu"));
+    final LocalDate today = LocalDate.now();
+    final LocalDate MONDAY = today.with(DayOfWeek.MONDAY);
+    final LocalDate SUNDAY = today.with(DayOfWeek.SUNDAY);
+    List<DataRecord> leagues = subscriberService.getLeagues(exist, MONDAY, SUNDAY);
+    if (leagues.isEmpty()) {
+      return ResponseEntity.ok(Response.FAIL("Không có trận đấu nào"));
     }
 
-    StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < matchups.size(); i++) {
-      Matchup match = matchups.get(i);
-      builder.append(String.format("""
-      %d ⚽️
-      %s vs %s
-      %s
-      Sân %s
-
-      """,
-        i + 1,
-        match.getHomeTeam().getName(),
-        match.getAwayTeam().getName(),
-        match.getFormatMatchDay(),
-        match.getHomeStadium()
-      ));
-    }
-    return ResponseEntity.ok(Response.SUCCESS(
-      String.format("Tuần này có %s trận đấu", matchups.size()),
-      builder.toString()
-    ));
+    return ResponseEntity.ok(
+      Response.SUCCESS("Get Leagues's matches success", leagues)
+    );
   }
 }

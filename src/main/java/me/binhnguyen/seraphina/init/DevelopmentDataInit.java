@@ -66,7 +66,7 @@ public class DevelopmentDataInit {
       if (Objects.isNull(league_3))
         championLeagueService.create();
     } catch (Exception e) {
-      log.error("Failed to initialize Champion League", e);
+      log.error("Failed to initialize Champions League", e);
     }
   }
 
@@ -84,7 +84,7 @@ public class DevelopmentDataInit {
     try {
       championLeagueService.createOrUpdateTeams();
     } catch (Exception e) {
-      log.error("Failed to initialize Champion League teams", e);
+      log.error("Failed to initialize Champions League teams", e);
     }
   }
 

@@ -45,7 +45,7 @@ public class ChampionLeagueService extends LeagueService {
       log.warn("League: {} is already exist", exist.getName());
       return exist;
     } else {
-      League championLeague = leagueRepo.save(new League(LEAGUE_CODE, "Champion League"));
+      League championLeague = leagueRepo.save(new League(LEAGUE_CODE, "Champions League"));
       log.info("League: {} created", championLeague.getName());
       return championLeague;
     }
@@ -53,7 +53,7 @@ public class ChampionLeagueService extends LeagueService {
 
   @Override
   public List<MatchDay> createOrUpdateAllMatchDays() {
-    log.warn("Champion League has no accurate match days");
+    log.warn("Champions League has no accurate match days");
     return Collections.emptyList();
   }
 

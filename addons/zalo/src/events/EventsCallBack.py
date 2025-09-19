@@ -42,15 +42,28 @@ async def get_schedule(update: Update, context):
   response_data: dict = response.json()
   success: bool = response_data.get("success", False)
   server_message: str = response_data.get("message", "")
+  leagues: list[dict] = response_data.get("data", [])
 
   if (not success):
     await update.message.reply_text(server_message) # type: ignore
     return
 
-  matches_data: str = response_data.get("data", "")
-  message: str = f"{server_message}\n{matches_data}"
-  await update.message.reply_text(message) # type: ignore
+  for league in leagues:
+    name: str = league.get("name", "Không xác định")
+    await update.message.reply_text(name) # type: ignore
 
+    matches: list[dict] = league.get("matches", [])
+    for match in matches:
+      message = f"""
+{matches.index(match) + 1}. {match.get("home", "TBD")} vs {match.get("away", "TBD")} ⚽️
+Giờ đá: {match.get("matchDay", "TBD")}
+Sân: {match.get("stadium", "TBD")}
+      """.strip()
+      try:
+        await update.message.reply_text(message) # type: ignore
+      except Exception as e:
+        print(str(e))
+        continue
 
 async def follow_premier_league(update: Update, context):
   if (not update.effective_user):
