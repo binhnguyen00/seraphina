@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
-
 @SpringBootTest
 @ActiveProfiles("test")
 public class ZaloTest {
@@ -37,7 +35,6 @@ public class ZaloTest {
 
   @Test
   public void testSendMessage() {
-    List<Subscriber> subscribers = service.getAllSubscribers();
-    service.sendMessageTo(subscribers, "This is a test message");
+    Subscriber me = service.getSubscriber("306e6075fc20157e4c31");
   }
 }

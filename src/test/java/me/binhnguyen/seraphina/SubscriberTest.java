@@ -1,5 +1,6 @@
 package me.binhnguyen.seraphina;
 
+import me.binhnguyen.seraphina.common.DataRecord;
 import me.binhnguyen.seraphina.entity.League;
 import me.binhnguyen.seraphina.entity.Subscriber;
 import org.junit.jupiter.api.Assertions;
@@ -7,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 
 @SpringBootTest
@@ -55,5 +58,20 @@ public class SubscriberTest extends InitDataTest {
     League laliga = laligaService.get();
     success = subscriberService.unfollowLeague(LOOKUP_ID, laliga.getCode()).success();
     Assertions.assertTrue(success);
+  }
+
+  @Test
+  void getFollowingLeaguesMatches() {
+    League championsLeague = championLeagueService.get();
+    League premierLeague = premierLeagueService.get();
+    subscriberService.unfollowLeague(LOOKUP_ID, premierLeague.getCode());
+    subscriberService.followLeague(LOOKUP_ID, championsLeague.getCode());
+
+    Subscriber subscriber = subscriberService.getSubscriber(LOOKUP_ID);
+    final LocalDate today = LocalDate.now();
+    final LocalDate MONDAY = today.with(DayOfWeek.MONDAY);
+    final LocalDate SUNDAY = today.with(DayOfWeek.SUNDAY);
+    List<DataRecord> leagues = subscriberService.getLeagues(subscriber, MONDAY, SUNDAY);
+    Assertions.assertFalse(leagues.isEmpty());
   }
 }

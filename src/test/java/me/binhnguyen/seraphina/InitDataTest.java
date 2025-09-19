@@ -2,10 +2,7 @@ package me.binhnguyen.seraphina;
 
 import lombok.extern.slf4j.Slf4j;
 import me.binhnguyen.seraphina.entity.Season;
-import me.binhnguyen.seraphina.service.LaligaService;
-import me.binhnguyen.seraphina.service.PremierLeagueService;
-import me.binhnguyen.seraphina.service.SeasonService;
-import me.binhnguyen.seraphina.service.SubscriberService;
+import me.binhnguyen.seraphina.service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -28,10 +25,13 @@ public abstract class InitDataTest {
   @Autowired
   public SubscriberService subscriberService;
 
+  @Autowired
+  public ChampionLeagueService championLeagueService;
+
   @BeforeEach
   void setup() {
     initSeason();
-    initLeague();
+    initLeagues();
     initTeams();
     initMatchDays();
     initThisWeekMatchups();
@@ -55,10 +55,11 @@ public abstract class InitDataTest {
     }
   }
 
-  private void initLeague() {
+  private void initLeagues() {
     try {
       premierLeagueService.create();
       laligaService.create();
+      championLeagueService.create();
     } catch (Exception e) {
       log.error("Failed to initialize leagues", e);
     }
@@ -68,6 +69,7 @@ public abstract class InitDataTest {
     try {
       premierLeagueService.createOrUpdateTeams();
       laligaService.createOrUpdateTeams();
+      championLeagueService.createOrUpdateTeams();
     } catch (Exception e) {
       log.error("Failed to initialize teams", e);
     }
@@ -90,6 +92,7 @@ public abstract class InitDataTest {
     try {
       premierLeagueService.createOrUpdateMatchups(THIS_MONDAY, THIS_SUNDAY);
       laligaService.createOrUpdateMatchups(THIS_MONDAY, THIS_SUNDAY);
+      championLeagueService.createOrUpdateMatchups(THIS_MONDAY, THIS_SUNDAY);
     } catch (Exception e) {
       log.error("Failed to initialize this week matchups", e);
     }
